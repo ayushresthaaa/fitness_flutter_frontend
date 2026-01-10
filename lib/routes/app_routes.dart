@@ -4,7 +4,6 @@ import 'pages/pages_routes.dart' as pageRoutes;
 
 final Map<String, WidgetBuilder> appRoutes = {
   ...authRoutes.authRoutes,
-  ...pageRoutes.pageRoutes, //has home too
-  // ...homeRoutes.homeRoutes,
+  ...pageRoutes.pageRoutes,
   // add other route maps here
 };

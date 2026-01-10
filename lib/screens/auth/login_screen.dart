@@ -143,16 +143,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
+                    // Login Button
                     onPressed: authProvider.isLoading
                         ? null
                         : () async {
-                            // Add async here
                             await authProvider.login(
-                              // Add await here
                               _emailController.text.trim(),
                               _passwordController.text,
                             );
                             if (authProvider.isAuthenticated && mounted) {
+                              // Just navigate - guards handle the rest!
                               Navigator.pushReplacementNamed(
                                 context,
                                 HomeScreen.routeName,
@@ -213,11 +213,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: authProvider.isLoading
                         ? null
                         : () async {
-                            // Changed to async
-                            await authProvider.loginWithGoogle(); // Added await
-
-                            // Navigate after successful login
+                            await authProvider.loginWithGoogle();
                             if (authProvider.isAuthenticated && mounted) {
+                              // Just navigate - guards handle the rest!
                               Navigator.pushReplacementNamed(
                                 context,
                                 HomeScreen.routeName,

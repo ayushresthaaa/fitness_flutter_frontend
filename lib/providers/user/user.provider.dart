@@ -58,9 +58,7 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // ======================
   // Fetch current user profile
-  // ======================
   Future<void> fetchUserProfile() async {
     _setLoading(true);
 
@@ -81,9 +79,7 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // ======================
   // Logout / clear state
-  // ======================
   void clearUser() {
     _currentUser = null;
     _currentProfile = null;
@@ -91,9 +87,7 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // ======================
   // Helpers
-  // ======================
   void _setLoading(bool value) {
     _isLoading = value;
     _error = null;

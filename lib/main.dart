@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
-// Import your AuthProvider
+// Import your providers
 import 'providers/auth/auth_provider.dart';
+import './providers/user/user.provider.dart';
 
 // Import your routes
 import 'routes/app_routes.dart';
@@ -24,23 +25,19 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthProvider>(
-      create: (_) => AuthProvider()..tryAutoLogin(),
-      child: Consumer<AuthProvider>(
-        builder: (ctx, auth, _) {
-          return MaterialApp(
-            title: 'Fitness App',
-            initialRoute: auth.isLoading
-                ? '/loading'
-                : auth.token != null
-                ? HomeScreen.routeName
-                : LoginScreen.routeName,
-            routes: {
-              '/loading': (context) =>
-                  Scaffold(body: Center(child: CircularProgressIndicator())),
-              ...appRoutes,
-            },
-          );
+    // Use MultiProvider to provide BOTH AuthProvider and UserProvider
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Fitness App',
+        initialRoute: LoginScreen.routeName,
+        routes: {
+          '/loading': (context) =>
+              Scaffold(body: Center(child: CircularProgressIndicator())),
+          ...appRoutes,
         },
       ),
     );
