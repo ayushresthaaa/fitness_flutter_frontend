@@ -11,7 +11,7 @@ class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     serverClientId:
-        '525081444214-1sftbuulbj64u7bq48vvl3ishbq3dvrd.apps.googleusercontent.com', // Add this back
+        '525081444214-1sftbuulbj64u7bq48vvl3ishbq3dvrd.apps.googleusercontent.com', 
   );
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
