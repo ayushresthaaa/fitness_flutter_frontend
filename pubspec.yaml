@@ -19,6 +19,8 @@ dependencies:
   flutter_secure_storage: ^9.2.2 # Update from ^8.0.0
   formz: ^0.8.0
   introduction_screen: ^4.0.0
+  shared_preferences: ^2.5.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

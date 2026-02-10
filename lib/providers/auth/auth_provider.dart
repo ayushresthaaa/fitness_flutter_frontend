@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user/user.dart';
 import '../../services/auth/auth_service.dart';
+import '../../providers/user/user.provider.dart';
 import '../../utils/validation/validators.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -45,6 +46,12 @@ class AuthProvider extends ChangeNotifier {
       final result = await _authService.login(email, password);
       _user = result['user'];
       _token = result['token'];
+
+      //token is stored in secure storage in auth service, so no need to store it again here
+      //fetch user profile after login
+      // final userProvider = UserProvider();
+      // userProvider.setUser(_user!);
+      //do this in the login screen after successful login, so we can fetch the profile and set it in the user provider
     } catch (e) {
       _error = e.toString();
     }

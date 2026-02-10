@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
 import 'register_screen.dart';
 import '../home/home_screen.dart';
+import '../../providers/user/user.provider.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -14,7 +15,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  bool _obscurePassword =
+      true; //this is for the password field to show/hide password
 
   @override
   void dispose() {
@@ -152,7 +154,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               _passwordController.text,
                             );
                             if (authProvider.isAuthenticated && mounted) {
-                              // Just navigate - guards handle the rest!
+                              //fetch user profile after login, so we can set it in the user provider and check onboarding status
+                              final userProvider = context.read<UserProvider>();
+                              userProvider.setUser(authProvider.user!);
+
                               Navigator.pushReplacementNamed(
                                 context,
                                 HomeScreen.routeName,
