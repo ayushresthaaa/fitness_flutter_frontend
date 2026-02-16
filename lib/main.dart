@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-
+import 'api/api_client.dart';
 // Import your providers
 import 'providers/auth/auth_provider.dart';
 import './providers/user/user.provider.dart';
@@ -17,6 +17,9 @@ void main() async {
 
   // Load environment variables from the .env file
   await dotenv.load(fileName: ".env");
+
+  // Initialize the API client
+  ApiClient().initialize();
 
   // Run the app
   runApp(MyApp());
