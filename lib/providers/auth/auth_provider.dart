@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/user/user.dart';
 import '../../services/auth/auth_service.dart';
-import '../../providers/user/user.provider.dart';
 import '../../utils/validation/validators.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

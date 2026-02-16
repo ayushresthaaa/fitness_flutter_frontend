@@ -20,6 +20,7 @@ dependencies:
   formz: ^0.8.0
   introduction_screen: ^4.0.0
   shared_preferences: ^2.5.4
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
