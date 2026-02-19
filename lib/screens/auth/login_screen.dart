@@ -220,7 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         : () async {
                             await authProvider.loginWithGoogle();
                             if (authProvider.isAuthenticated && mounted) {
-                              // Just navigate - guards handle the rest!
+                              final userProvider = context.read<UserProvider>();
+                              userProvider.setUser(authProvider.user!);
                               Navigator.pushReplacementNamed(
                                 context,
                                 HomeScreen.routeName,

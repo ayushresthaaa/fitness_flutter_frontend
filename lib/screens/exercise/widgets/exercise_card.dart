@@ -2,70 +2,182 @@ import 'package:flutter/material.dart';
 import '../../../models/exercise/exercise_model.dart';
 
 class ExerciseCard extends StatelessWidget {
-  //stateless means it doesn't manage its own state, it just displays data passed to it
-  final Exercise
-  exercise; //this value doesnt change within the card, it is passed in when the card is created; also this is the data model for the exercise, it contains all the info about the exercise that we want to display on the card
-  final VoidCallback
-  onTap; //this is a function that gets called when the card is tapped; it is passed in from the parent widget, and it allows the card to notify the parent when it is tapped, so the parent can navigate to the exercise details screen or do something else
+  final Exercise exercise;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onAdd;
 
-  const ExerciseCard({required this.exercise, required this.onTap});
+  const ExerciseCard({
+    super.key,
+    required this.exercise,
+    required this.isSelected,
+    required this.onTap,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
-    //build context means child can access parents widget data and stuff at the time of building the widget tree;
-    return Card(
-      margin: EdgeInsets.only(bottom: 12),
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            children: [
-              _buildIcon(),
-              SizedBox(width: 16),
-              Expanded(child: _buildContent()),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            _ExerciseImage(
+              imageUrl: exercise.images.isNotEmpty
+                  ? exercise.images[0].replaceAll('localhost', '192.168.1.82')
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    exercise.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${_capitalize(exercise.category)} · ${_capitalize(exercise.level)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  if (exercise.primaryMuscles.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: exercise.primaryMuscles
+                          .take(2)
+                          .map((m) => _MuscleTag(label: m))
+                          .toList(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            _AddButton(isSelected: isSelected, onTap: onAdd),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildIcon() {
+  String _capitalize(String value) {
+    if (value.isEmpty) return value;
+    return value[0].toUpperCase() + value.substring(1);
+  }
+}
+
+class _ExerciseImage extends StatelessWidget {
+  final String? imageUrl;
+
+  const _ExerciseImage({this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: 50,
-      height: 50,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
-        color: Colors.blue[50],
+        color: const Color(0xFFF0F4FF),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Center(child: Text('🏋️', style: TextStyle(fontSize: 24))),
+      clipBehavior: Clip.antiAlias,
+      child: imageUrl != null
+          ? Image.network(
+              imageUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const _ImageFallback(),
+              loadingBuilder: (_, child, progress) => progress == null
+                  ? child
+                  : const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF2563EB),
+                        ),
+                      ),
+                    ),
+            )
+          : const _ImageFallback(),
     );
   }
+}
 
-  Widget _buildContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          exercise.name,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+class _ImageFallback extends StatelessWidget {
+  const _ImageFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.fitness_center, color: Color(0xFF2563EB), size: 24);
+  }
+}
+
+class _MuscleTag extends StatelessWidget {
+  final String label;
+
+  const _MuscleTag({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F4FF),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF2563EB),
+          fontWeight: FontWeight.w500,
         ),
-        SizedBox(height: 4),
-        Text(
-          '${_capitalize(exercise.category)} • ${_capitalize(exercise.level)}',
-          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-        ),
-      ],
+      ),
     );
   }
+}
 
-  String _capitalize(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1).replaceAll('_', ' ');
+class _AddButton extends StatelessWidget {
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _AddButton({required this.isSelected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF0F4FF),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          isSelected ? Icons.check : Icons.add,
+          size: 18,
+          color: isSelected ? Colors.white : const Color(0xFF2563EB),
+        ),
+      ),
+    );
   }
 }

@@ -6,7 +6,7 @@ import '../../models/user/user.dart';
 
 class UserService {
   final String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.82:4000/api';
+      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.76:4000/api';
 
   // Complete onboarding using UserProfile object
   Future<UserProfile> completeOnboarding({
@@ -44,7 +44,8 @@ class UserService {
   Future<User> getUserProfile(String token) async {
     final url = Uri.parse('$baseUrl/auth/me');
 
-    final response = await http.get(
+    final response = await http.post(
+      //changed to post to match backend route
       url,
       headers: {
         'Content-Type': 'application/json',

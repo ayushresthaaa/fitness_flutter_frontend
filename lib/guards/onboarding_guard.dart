@@ -13,6 +13,8 @@ class OnboardingGuard extends StatefulWidget {
 }
 
 class _OnboardingGuardState extends State<OnboardingGuard> {
+  bool _isChecking = true;
+
   @override
   void initState() {
     super.initState();
@@ -22,24 +24,38 @@ class _OnboardingGuardState extends State<OnboardingGuard> {
   Future<void> _checkOnboarding() async {
     final userProvider = context.read<UserProvider>();
 
-    // Fetch profile if needed
-    if (userProvider.currentProfile == null) {
-      await userProvider.fetchUserProfile();
+    try {
+      if (userProvider.currentProfile == null) {
+        await userProvider.fetchUserProfile();
+      }
+    } catch (e) {
+      print('Profile fetch failed: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isChecking = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isChecking) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF2563EB)),
+        ),
+      );
+    }
+
     final userProvider = context.watch<UserProvider>();
 
-    // Not onboarded? Redirect immediately
     if (!userProvider.hasCompletedOnboarding) {
       Future.microtask(() {
         Navigator.of(context).pushReplacementNamed(OnboardingScreen.routeName);
       });
-      return SizedBox.shrink(); // Return nothing while redirecting
+      return const SizedBox.shrink();
     }
 
-    return widget.child; // Show the protected screen
+    return widget.child;
   }
 }

@@ -1,0 +1,31 @@
+// Simple style constants we'll follow everywhere
+
+Colors:
+- Primary blue:     #2563EB   (buttons, selected states, accents)
+- Background:       #F5F5F5   (scaffold bg)
+- Card bg:          #FFFFFF
+- Text primary:     #1A1A1A
+- Text secondary:   #6B7280
+- Chip selected:    #2563EB with white text
+- Chip unselected:  #FFFFFF with grey text, light border
+
+Spacing:
+- Screen padding:   16px horizontal
+- Card padding:     12px
+- Between cards:    8px gap
+
+Cards:
+- borderRadius:     12px
+- elevation:        0 (no shadow, just white on grey bg)
+- border:           none
+
+Typography:
+- Title:            16px, FontWeight.w600
+- Subtitle:         13px, FontWeight.w400, grey
+- Body:             14px, FontWeight.w400
+- Chip text:        12px, FontWeight.w500
+
+Buttons:
+- Primary:          blue bg, white text, radius 12px, height 50px
+- No gradients
+- No shadows

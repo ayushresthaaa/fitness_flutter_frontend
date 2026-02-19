@@ -7,11 +7,11 @@ import '../../models/user/user.dart';
 
 class AuthService {
   final String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.82:4000/api';
+      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.76:4000/api';
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     serverClientId:
-        '525081444214-1sftbuulbj64u7bq48vvl3ishbq3dvrd.apps.googleusercontent.com', 
+        '525081444214-1sftbuulbj64u7bq48vvl3ishbq3dvrd.apps.googleusercontent.com',
   );
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
@@ -68,7 +68,7 @@ class AuthService {
   Future<Map<String, dynamic>> loginWithGoogle() async {
     try {
       print('🔵 Starting Google Sign-In...');
-
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       print('🔵 Google user: ${googleUser?.email}');
 

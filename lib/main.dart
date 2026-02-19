@@ -5,6 +5,8 @@ import 'api/api_client.dart';
 // Import your providers
 import 'providers/auth/auth_provider.dart';
 import './providers/user/user.provider.dart';
+import './providers/exercise/exercise_provider.dart';
+import './providers/exercise/workout_provider.dart';
 
 // Import your routes
 import 'routes/app_routes.dart';
@@ -33,6 +35,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+        ChangeNotifierProvider<ExerciseProvider>(
+          create: (_) => ExerciseProvider(),
+        ),
+        ChangeNotifierProvider<WorkoutProvider>(
+          create: (_) => WorkoutProvider(),
+        ),
       ],
       child: MaterialApp(
         title: 'Fitness App',
