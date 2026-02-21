@@ -17,6 +17,8 @@ class SetData {
 class SetRow extends StatefulWidget {
   final int setNumber;
   final SetData data;
+  final double? lastWeightKg; //
+  final int? lastReps; //
   final Function(SetData) onChanged;
   final VoidCallback onToggleDone;
   final VoidCallback onRemove;
@@ -25,6 +27,8 @@ class SetRow extends StatefulWidget {
     super.key,
     required this.setNumber,
     required this.data,
+    this.lastWeightKg, // ← ADD
+    this.lastReps, // ← ADD
     required this.onChanged,
     required this.onToggleDone,
     required this.onRemove,
@@ -85,6 +89,7 @@ class _SetRowState extends State<SetRow> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Set number
           SizedBox(
@@ -103,31 +108,56 @@ class _SetRowState extends State<SetRow> {
 
           // Weight
           Expanded(
-            child: TextField(
-              controller: _weightCtrl,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              textAlign: TextAlign.center,
-              style: _inputStyle(done),
-              decoration: _inputDecoration(done),
-              onChanged: (v) => widget.onChanged(
-                widget.data.copyWith(weightKg: double.tryParse(v)),
-              ),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _weightCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  textAlign: TextAlign.center,
+                  style: _inputStyle(done),
+                  decoration: _inputDecoration(done),
+                  onChanged: (v) => widget.onChanged(
+                    widget.data.copyWith(weightKg: double.tryParse(v)),
+                  ),
+                ),
+                if (widget.lastWeightKg != null)
+                  Text(
+                    '${widget.lastWeightKg}kg',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF9E9E9E),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
 
           // Reps
           Expanded(
-            child: TextField(
-              controller: _repsCtrl,
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: _inputStyle(done),
-              decoration: _inputDecoration(done),
-              onChanged: (v) =>
-                  widget.onChanged(widget.data.copyWith(reps: int.tryParse(v))),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _repsCtrl,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: _inputStyle(done),
+                  decoration: _inputDecoration(done),
+                  onChanged: (v) => widget.onChanged(
+                    widget.data.copyWith(reps: int.tryParse(v)),
+                  ),
+                ),
+                if (widget.lastReps != null)
+                  Text(
+                    '${widget.lastReps} reps',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF9E9E9E),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 8),

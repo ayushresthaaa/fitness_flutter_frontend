@@ -10,11 +10,12 @@ class WorkoutExerciseCard extends StatelessWidget {
   final Function(int index, SetData updated) onSetChanged;
   final Function(int index) onSetToggled;
   final Function(int index) onSetRemoved;
-
+  final List<Map<String, dynamic>> lastPerformance;
   const WorkoutExerciseCard({
     super.key,
     required this.workoutExercise,
     required this.sets,
+    required this.lastPerformance,
     required this.onAddSet,
     required this.onInfoTap,
     required this.onSetChanged,
@@ -105,10 +106,17 @@ class WorkoutExerciseCard extends StatelessWidget {
           ),
 
           // Set rows
+          // Set rows
           ...sets.asMap().entries.map(
             (e) => SetRow(
               setNumber: e.key + 1,
               data: e.value,
+              lastWeightKg: lastPerformance.length > e.key
+                  ? (lastPerformance[e.key]['weightKg'] as num?)?.toDouble()
+                  : null,
+              lastReps: lastPerformance.length > e.key
+                  ? lastPerformance[e.key]['reps'] as int?
+                  : null,
               onChanged: (updated) => onSetChanged(e.key, updated),
               onToggleDone: () => onSetToggled(e.key),
               onRemove: () => onSetRemoved(e.key),

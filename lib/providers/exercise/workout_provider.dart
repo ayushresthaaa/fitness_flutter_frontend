@@ -24,6 +24,10 @@ class WorkoutProvider extends BaseProvider {
   bool get hasActiveWorkout =>
       _currentWorkout != null && _currentWorkout!.endTime == null;
 
+  final Map<String, List<Map<String, dynamic>>> _lastPerformance = {};
+
+  Map<String, List<Map<String, dynamic>>> get lastPerformance =>
+      _lastPerformance;
   // Start a new workout
   Future<void> startWorkout({String? title, String? notes}) async {
     final result = await execute(
@@ -207,5 +211,22 @@ class WorkoutProvider extends BaseProvider {
   Future<void> saveSets(List<Map<String, dynamic>> exerciseSets) async {
     if (_currentWorkout == null) return;
     await execute(() => _service.saveSets(_currentWorkout!.id, exerciseSets));
+  }
+
+  // fetch last performance for all exercises in current workout
+  Future<void> fetchLastPerformances() async {
+    final workout = _currentWorkout;
+    if (workout == null) return;
+
+    for (final we in workout.exercises) {
+      final result = await execute(
+        () => _service.getLastPerformance(we.exerciseId),
+      );
+      if (result != null) {
+        final sets = List<Map<String, dynamic>>.from(result['lastSets'] ?? []);
+        _lastPerformance[we.exerciseId] = sets;
+      }
+    }
+    notifyListeners();
   }
 }

@@ -24,6 +24,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   void initState() {
     super.initState();
     _initSets();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WorkoutProvider>().fetchLastPerformances();
+    });
   }
 
   void _initSets() {
@@ -296,6 +299,11 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
             child: WorkoutExerciseCard(
               workoutExercise: we,
               sets: _getSets(we.id),
+              lastPerformance:
+                  context
+                      .read<WorkoutProvider>()
+                      .lastPerformance[we.exerciseId] ??
+                  [],
               onAddSet: () => _addSet(we.id),
               onInfoTap: () {},
               onSetChanged: (i, updated) => _updateSet(we.id, i, updated),

@@ -126,4 +126,12 @@ class WorkoutService {
       data: {'exerciseSets': exerciseSets},
     );
   }
+
+  // GET /api/workouts/exercises/:exerciseId/last
+  Future<Map<String, dynamic>?> getLastPerformance(String exerciseId) async {
+    final response = await _dio.get(
+      '${ApiEndpoints.workouts}/exercises/$exerciseId/last',
+    );
+    return response.data['data'];
+  }
 }
