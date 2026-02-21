@@ -115,4 +115,15 @@ class WorkoutService {
   Future<void> removeExercise(String workoutId, String exerciseId) async {
     await _dio.delete(ApiEndpoints.workoutExerciseById(workoutId, exerciseId));
   }
+
+  // POST /api/workouts/:id/sets
+  Future<void> saveSets(
+    String workoutId,
+    List<Map<String, dynamic>> exerciseSets,
+  ) async {
+    await _dio.post(
+      '${ApiEndpoints.workouts}/$workoutId/sets',
+      data: {'exerciseSets': exerciseSets},
+    );
+  }
 }

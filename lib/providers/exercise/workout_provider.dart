@@ -202,4 +202,10 @@ class WorkoutProvider extends BaseProvider {
     clearError();
     notifyListeners();
   }
+
+  // Save all sets when finishing workout
+  Future<void> saveSets(List<Map<String, dynamic>> exerciseSets) async {
+    if (_currentWorkout == null) return;
+    await execute(() => _service.saveSets(_currentWorkout!.id, exerciseSets));
+  }
 }

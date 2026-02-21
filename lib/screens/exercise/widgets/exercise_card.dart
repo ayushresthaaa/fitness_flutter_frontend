@@ -29,7 +29,7 @@ class ExerciseCard extends StatelessWidget {
           children: [
             _ExerciseImage(
               imageUrl: exercise.images.isNotEmpty
-                  ? exercise.images[0].replaceAll('localhost', '192.168.1.82')
+                  ? exercise.images[0].replaceAll('localhost', '192.168.1.76')
                   : null,
             ),
             const SizedBox(width: 12),

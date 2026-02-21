@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
 import '../exercise/exericse_picker_screen.dart';
+import '../workout/active_workout_screen.dart';
+import '../../providers/exercise/workout_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -233,19 +235,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: _buildQuickActionCard(
                         icon: Icons.fitness_center,
                         label: 'Log Workout',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ExercisePickerScreen(
-                                onExercisesSelected: (exercises) {
-                                  print(
-                                    'Selected: ${exercises.map((e) => e.name).toList()}',
-                                  );
-                                },
-                              ),
-                            ),
+                        onTap: () async {
+                          await context.read<WorkoutProvider>().startWorkout(
+                            title: 'My Workout',
                           );
+                          if (mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ActiveWorkoutScreen(),
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),

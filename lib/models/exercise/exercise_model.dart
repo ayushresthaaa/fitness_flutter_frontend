@@ -37,7 +37,9 @@ class Exercise {
       primaryMuscles: List<String>.from(json['primaryMuscles'] ?? []),
       secondaryMuscles: List<String>.from(json['secondaryMuscles'] ?? []),
       instructions: List<String>.from(json['instructions'] ?? []),
-      images: List<String>.from(json['images'] ?? []),
+      images: (json['images'] as List? ?? [])
+          .map((e) => (e as String).replaceAll('localhost', '192.168.1.76'))
+          .toList(),
     );
   }
 
