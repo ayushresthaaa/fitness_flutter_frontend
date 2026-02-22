@@ -29,13 +29,15 @@ class Workout {
       userId: json['userId'],
       title: json['title'],
       notes: json['notes'],
-      startTime: DateTime.parse(json['startTime']),
-      endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
+      startTime: DateTime.parse(json['startTime']).toLocal(),
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime']).toLocal()
+          : null,
       exercises: (json['exercises'] as List? ?? [])
           .map((e) => WorkoutExercise.fromJson(e))
           .toList(),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
     );
   }
 
@@ -64,7 +66,8 @@ class WorkoutExercise {
   final int? durationSec;
   final int order;
   final String? notes;
-  final Exercise? exercise; // populated by backend with 'include'
+  final Exercise? exercise;
+  final List<WorkoutSet> workoutSets; // ← ADDED
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -79,6 +82,7 @@ class WorkoutExercise {
     required this.order,
     this.notes,
     this.exercise,
+    this.workoutSets = const [], // ← ADDED
     required this.createdAt,
     required this.updatedAt,
   });
@@ -97,6 +101,10 @@ class WorkoutExercise {
       exercise: json['exercise'] != null
           ? Exercise.fromJson(json['exercise'])
           : null,
+      workoutSets:
+          (json['workoutSets'] as List? ?? []) // ← ADDED
+              .map((s) => WorkoutSet.fromJson(s))
+              .toList(),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -114,8 +122,50 @@ class WorkoutExercise {
       'order': order,
       'notes': notes,
       'exercise': exercise?.toJson(),
+      'workoutSets': workoutSets.map((s) => s.toJson()).toList(), // ← ADDED
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+}
+
+// ← ADDED
+class WorkoutSet {
+  final String id;
+  final String workoutExerciseId;
+  final int setNumber;
+  final double? weightKg;
+  final int? reps;
+  final bool isCompleted;
+
+  WorkoutSet({
+    required this.id,
+    required this.workoutExerciseId,
+    required this.setNumber,
+    this.weightKg,
+    this.reps,
+    this.isCompleted = false,
+  });
+
+  factory WorkoutSet.fromJson(Map<String, dynamic> json) {
+    return WorkoutSet(
+      id: json['id'],
+      workoutExerciseId: json['workoutExerciseId'],
+      setNumber: json['setNumber'],
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      reps: json['reps'],
+      isCompleted: json['isCompleted'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'workoutExerciseId': workoutExerciseId,
+      'setNumber': setNumber,
+      'weightKg': weightKg,
+      'reps': reps,
+      'isCompleted': isCompleted,
     };
   }
 }

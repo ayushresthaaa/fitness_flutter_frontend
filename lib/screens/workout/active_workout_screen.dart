@@ -69,7 +69,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     final sets = List<SetData>.from(_setsMap[id] ?? []);
     final set = sets[index];
 
-    // block if trying to mark done but reps is empty
+    // block marking done if reps empty
     if (!set.isCompleted && set.reps == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -80,15 +80,33 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       return;
     }
 
+    // confirm before unchecking a completed set
+    if (set.isCompleted) {
+      AppDialog.show<bool>(
+        context: context,
+        title: 'Undo Set?',
+        message: 'Are you sure you want to mark this set as incomplete?',
+        actions: [
+          const AppDialogAction(label: 'Cancel', value: false),
+          const AppDialogAction(label: 'Undo', value: true, color: Colors.red),
+        ],
+      ).then((result) {
+        if (result == true) {
+          setState(() {
+            sets[index] = set.copyWith(isCompleted: false);
+            _setsMap[id] = sets;
+            _showRestTimer = false;
+          });
+        }
+      });
+      return;
+    }
+
     setState(() {
-      sets[index] = set.copyWith(isCompleted: !set.isCompleted);
+      sets[index] = set.copyWith(isCompleted: true);
       _setsMap[id] = sets;
-      if (sets[index].isCompleted) {
-        _showRestTimer = false;
-        Future.microtask(() => setState(() => _showRestTimer = true));
-      } else {
-        _showRestTimer = false;
-      }
+      _showRestTimer = false;
+      Future.microtask(() => setState(() => _showRestTimer = true));
     });
   }
 
@@ -99,6 +117,8 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       final we = provider.currentWorkout?.exercises.last;
       if (we != null) _setsMap[we.id] = [const SetData()];
     }
+    // fetch last performance after adding exercises
+    await provider.fetchLastPerformances();
     setState(() {});
   }
 
@@ -290,6 +310,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   }
 
   Widget _buildExerciseList(workout) {
+    final lastPerformance = context
+        .watch<WorkoutProvider>()
+        .lastPerformance; // ← TOP LEVEL
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -300,10 +323,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
               workoutExercise: we,
               sets: _getSets(we.id),
               lastPerformance:
-                  context
-                      .read<WorkoutProvider>()
-                      .lastPerformance[we.exerciseId] ??
-                  [],
+                  lastPerformance[we.exerciseId] ?? [], // ← USE VARIABLE
               onAddSet: () => _addSet(we.id),
               onInfoTap: () {},
               onSetChanged: (i, updated) => _updateSet(we.id, i, updated),
@@ -382,8 +402,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   }
 
   String _formatTime(DateTime time) {
-    final h = time.hour;
-    final m = time.minute.toString().padLeft(2, '0');
+    final local = time.toLocal();
+    final h = local.hour;
+    final m = local.minute.toString().padLeft(2, '0');
     final period = h >= 12 ? 'PM' : 'AM';
     final hour = h > 12
         ? h - 12

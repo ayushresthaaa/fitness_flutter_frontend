@@ -216,17 +216,29 @@ class WorkoutProvider extends BaseProvider {
   // fetch last performance for all exercises in current workout
   Future<void> fetchLastPerformances() async {
     final workout = _currentWorkout;
-    if (workout == null) return;
+    if (workout == null) {
+      print('NO CURRENT WORKOUT');
+      return;
+    }
 
     for (final we in workout.exercises) {
+      print('Fetching for exerciseId: ${we.exerciseId}');
       final result = await execute(
         () => _service.getLastPerformance(we.exerciseId),
       );
+      print('Got result: $result');
       if (result != null) {
         final sets = List<Map<String, dynamic>>.from(result['lastSets'] ?? []);
+        print('Sets parsed: $sets');
         _lastPerformance[we.exerciseId] = sets;
       }
     }
+    print('Final lastPerformance map: $_lastPerformance');
+    notifyListeners();
+  }
+
+  void setCurrentWorkout(Workout workout) {
+    _currentWorkout = workout;
     notifyListeners();
   }
 }
