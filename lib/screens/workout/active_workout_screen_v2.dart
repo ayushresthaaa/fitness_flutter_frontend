@@ -74,7 +74,17 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
   }
 
   // Remove exercise locally
-  void _removeExercise(String localId) {
+  Future<void> _removeExercise(String localId) async {
+    final confirmed = await AppDialog.show<bool>(
+      context: context,
+      title: 'Remove Exercise?',
+      message: 'All sets for this exercise will be lost.',
+      actions: [
+        const AppDialogAction(label: 'Cancel', value: false, color: kPrimary),
+        const AppDialogAction(label: 'Remove', value: true, color: kRed),
+      ],
+    );
+    if (confirmed != true) return;
     setState(() {
       _exercises.removeWhere((e) => e['localId'] == localId);
       _exerciseSets.remove(localId);
@@ -112,11 +122,13 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
   // Mark set complete — PR check + show rest timer
   void _completeSet(String localId, int index, String exerciseId) {
     final set = _exerciseSets[localId]![index];
-    final lastSets = _lastPerformance[exerciseId] ?? [];
 
-    // PR — is weight higher than last time for this set?
+    // Don't allow completing if kg or reps are empty
+    if (set.weightKg == null || set.reps == null) return;
+
+    final lastSets = _lastPerformance[exerciseId] ?? [];
     bool isPR = false;
-    if (set.weightKg != null && index < lastSets.length) {
+    if (index < lastSets.length) {
       final lastWeight = (lastSets[index]['weightKg'] as num?)?.toDouble() ?? 0;
       isPR = set.weightKg! > lastWeight;
     }
