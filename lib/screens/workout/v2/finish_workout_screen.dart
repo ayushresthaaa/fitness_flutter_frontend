@@ -36,7 +36,7 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
   Future<void> _finish() async {
     final provider = context.read<WorkoutProvider>();
 
-    // 1. Start workout
+    //  Start workout
     await provider.startWorkout(
       title: _titleController.text.trim().isEmpty
           ? 'My Workout'
@@ -46,11 +46,10 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
           : _notesController.text.trim(),
     );
 
-    final workout = provider.currentWorkout;
-    if (workout == null) return;
+    if (provider.currentWorkout == null) return;
 
-    // 2. Add exercises and save sets
-    final List<Map<String, dynamic>> exerciseSets = [];
+    //  Add exercises one by one and map localId → real workoutExerciseId
+    final Map<String, String> localIdToWorkoutExerciseId = {};
 
     for (final item in widget.exercises) {
       final exercise = item['exercise'] as Exercise;
@@ -58,11 +57,23 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
       final sets = widget.exerciseSets[localId] ?? [];
       if (sets.isEmpty) continue;
 
-      // Add exercise to workout
       await provider.addExerciseToWorkout(exerciseId: exercise.id);
-      final addedExercise = workout.exercises.last;
 
-      // Build set payload
+      // provider refreshes currentWorkout after each add, last exercise is the one we just added
+      final addedId = provider.currentWorkout!.exercises.last.id;
+      localIdToWorkoutExerciseId[localId] = addedId;
+    }
+
+    //  Build sets payload using real workoutExerciseIds
+    final List<Map<String, dynamic>> exerciseSets = [];
+    for (final item in widget.exercises) {
+      final localId = item['localId'] as String;
+      final workoutExerciseId = localIdToWorkoutExerciseId[localId];
+      if (workoutExerciseId == null) continue;
+
+      final sets = widget.exerciseSets[localId] ?? [];
+      if (sets.isEmpty) continue;
+
       final setPayload = <Map<String, dynamic>>[];
       for (final s in sets) {
         setPayload.add({
@@ -75,21 +86,26 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
           'isCompleted': s.isCompleted,
         });
       }
-
       exerciseSets.add({
-        'workoutExerciseId': addedExercise.id,
+        'workoutExerciseId': workoutExerciseId,
         'sets': setPayload,
       });
     }
 
-    // 3. Save sets
+    //  Save sets then finish
     await provider.saveSets(exerciseSets);
-
-    // 4. Finish workout
     await provider.finishWorkout();
 
-    // Pop all the way back to home
-    if (mounted) Navigator.popUntil(context, (route) => route.isFirst);
+    if (mounted) {
+      Navigator.popUntil(context, (route) => route.isFirst);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Workout saved!'),
+          backgroundColor: kGreen,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   int get _totalSets {

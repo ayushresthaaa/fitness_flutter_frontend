@@ -6,10 +6,11 @@ import 'set_row_v2.dart';
 
 class ExerciseSetCardV2 extends StatelessWidget {
   final Exercise
-  exercise; // ← changed from WorkoutExercise because we want to show name + last perf even if exercise is removed from workout
+  exercise; // changed from WorkoutExercise because we want to show name + last perf even if exercise is removed from workout
   final List<ActiveSet> sets;
   final List<Map<String, dynamic>> lastPerformance;
   final VoidCallback onAddSet;
+  final VoidCallback onAddWarmupSet;
   final VoidCallback onRemoveExercise;
   final Function(int index) onSetCompleted;
   final Function(int index) onSetRemoved;
@@ -21,6 +22,7 @@ class ExerciseSetCardV2 extends StatelessWidget {
     required this.sets,
     required this.lastPerformance,
     required this.onAddSet,
+    required this.onAddWarmupSet,
     required this.onRemoveExercise,
     required this.onSetCompleted,
     required this.onSetRemoved,
@@ -47,7 +49,7 @@ class ExerciseSetCardV2 extends StatelessWidget {
               onCompleted: () => onSetCompleted(i),
               onRemoved: () => onSetRemoved(i),
             ),
-          _buildAddSet(),
+          _buildAddSet(context),
         ],
       ),
     );
@@ -109,44 +111,108 @@ class ExerciseSetCardV2 extends StatelessWidget {
         children: [
           SizedBox(width: 30, child: _ColLabel('SET')),
           SizedBox(width: 8),
-          Expanded(child: _ColLabel('KG')),
+          Expanded(child: _ColLabel('KG (0=BW)')),
           SizedBox(width: 8),
           Expanded(child: _ColLabel('REPS')),
           SizedBox(width: 8),
-          SizedBox(width: 46, child: _ColLabel('RPE')),
+          Expanded(child: _ColLabel('RPE')),
           SizedBox(width: 8),
-          SizedBox(width: 30, child: _ColLabel('DONE')),
-          SizedBox(width: 24),
+          SizedBox(width: 38, child: _ColLabel('DONE')),
+          SizedBox(width: 20),
         ],
       ),
     );
   }
 
-  Widget _buildAddSet() {
-    return GestureDetector(
-      onTap: onAddSet,
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(14, 4, 14, 14),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: kPrimaryLight,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add, size: 15, color: kPrimary),
-            SizedBox(width: 4),
-            Text(
-              'Add Set',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: kPrimary,
+  Widget _buildAddSet(BuildContext context) {
+    final bool atLimit = sets.length >= 10;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
+      child: Row(
+        children: [
+          // Add working set
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (atLimit) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Maximum 10 sets per exercise'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                onAddSet();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: kPrimaryLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add, size: 15, color: kPrimary),
+                    SizedBox(width: 4),
+                    Text(
+                      'Add Set',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: kPrimary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Add warmup set
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (atLimit) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Maximum 10 sets per exercise'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                onAddWarmupSet();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3E0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add, size: 15, color: Color(0xFFF57C00)),
+                    SizedBox(width: 4),
+                    Text(
+                      'Warmup Set',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFF57C00),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

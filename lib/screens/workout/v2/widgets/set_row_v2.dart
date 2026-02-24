@@ -22,93 +22,107 @@ class SetRowV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 6),
-      child: Stack(
-        clipBehavior: Clip.none,
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 0, 14, 6),
+      padding: EdgeInsets.fromLTRB(
+        set.isWarmup ? 8 : 0,
+        4,
+        set.isWarmup ? 8 : 0,
+        4,
+      ),
+      decoration: set.isWarmup
+          ? BoxDecoration(
+              color: const Color(0xFFFFF8F0),
+              borderRadius: BorderRadius.circular(8),
+            )
+          : null,
+      child: Row(
         children: [
-          // PR badge floats above the row
-          if (set.isPR) const Positioned(top: -8, right: 24, child: _PRBadge()),
-
-          Row(
-            children: [
-              // W badge for warmup, number for normal sets
-              SizedBox(
-                width: 30,
-                child: set.isWarmup
-                    ? const _WarmupBadge()
-                    : Text(
-                        '${set.setNumber}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF9E9E9E),
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 8),
-
-              // kg input
-              Expanded(
-                child: SetInputV2(
-                  value: set.weightKg?.toString() ?? '',
-                  hint: 'kg',
-                  onChanged: (val) {
-                    onChanged(set.copyWith(weightKg: double.tryParse(val)));
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // reps input
-              Expanded(
-                child: SetInputV2(
-                  value: set.reps?.toString() ?? '',
-                  hint: 'reps',
-                  onChanged: (val) {
-                    onChanged(set.copyWith(reps: int.tryParse(val)));
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // RPE cell, tap to open picker
-              SizedBox(
-                width: 46,
-                child: GestureDetector(
-                  onTap: () => showRpePicker(
-                    context: context,
-                    set: set,
-                    onChanged: onChanged,
-                  ),
-                  child: Container(
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: set.rpe != null
-                          ? const Color(0xFFFFF3E0)
-                          : const Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      set.rpe?.toString() ?? '—',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: set.rpe != null
-                            ? const Color(0xFFF57C00)
-                            : const Color(0xFF9E9E9E),
-                      ),
+          // W badge for warmup, number for normal sets
+          SizedBox(
+            width: 30,
+            child: set.isWarmup
+                ? const _WarmupBadge()
+                : Text(
+                    '${set.setNumber}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF9E9E9E),
                     ),
                   ),
+          ),
+          const SizedBox(width: 8),
+
+          // kg input
+          Expanded(
+            child: SetInputV2(
+              value: set.weightKg?.toString() ?? '',
+              hint: '0',
+              onChanged: (val) {
+                onChanged(set.copyWith(weightKg: double.tryParse(val)));
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // reps input
+          Expanded(
+            child: SetInputV2(
+              value: set.reps?.toString() ?? '',
+              hint: 'reps',
+              onChanged: (val) {
+                onChanged(set.copyWith(reps: int.tryParse(val)));
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // RPE cell, tap to open picker
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!set.isCompleted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Complete the set first to add RPE'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                showRpePicker(context: context, set: set, onChanged: onChanged);
+              },
+              child: Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: set.rpe != null
+                      ? const Color(0xFFFFF3E0)
+                      : const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  set.rpe?.toString() ?? '—',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: set.rpe != null
+                        ? const Color(0xFFF57C00)
+                        : const Color(0xFF9E9E9E),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-
-              // Complete circle
-              GestureDetector(
-                onTap: onCompleted,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Complete circle
+          GestureDetector(
+            onTap: onCompleted,
+            child: SizedBox(
+              width: 38,
+              child: Center(
                 child: Container(
                   width: 30,
                   height: 30,
@@ -124,16 +138,16 @@ class SetRowV2 extends StatelessWidget {
                       : null,
                 ),
               ),
+            ),
+          ),
 
-              // Remove set
-              GestureDetector(
-                onTap: onRemoved,
-                child: const SizedBox(
-                  width: 24,
-                  child: Icon(Icons.close, size: 16, color: Color(0xFFBDBDBD)),
-                ),
-              ),
-            ],
+          // Remove set
+          GestureDetector(
+            onTap: onRemoved,
+            child: const SizedBox(
+              width: 20,
+              child: Icon(Icons.close, size: 16, color: Color(0xFFBDBDBD)),
+            ),
           ),
         ],
       ),
@@ -161,37 +175,6 @@ class _WarmupBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: Color(0xFFF57C00),
         ),
-      ),
-    );
-  }
-}
-
-// Yellow PR trophy badge shown above the row
-class _PRBadge extends StatelessWidget {
-  const _PRBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF9C4),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.emoji_events, size: 12, color: Color(0xFFF9A825)),
-          SizedBox(width: 2),
-          Text(
-            'PR',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFF9A825),
-            ),
-          ),
-        ],
       ),
     );
   }

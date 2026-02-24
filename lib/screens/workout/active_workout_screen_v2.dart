@@ -93,8 +93,17 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
 
   // Add empty set to exercise
   void _addSet(String localId) {
+    final sets = _exerciseSets[localId] ?? [];
+    if (sets.length >= 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Maximum 10 sets per exercise'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
     setState(() {
-      final sets = _exerciseSets[localId] ?? [];
       final normalSets = sets.where((s) => !s.isWarmup).length;
       sets.add(ActiveSet(setNumber: normalSets + 1));
       _exerciseSets[localId] = sets;
@@ -119,7 +128,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     setState(() => _exerciseSets[localId]![index] = updated);
   }
 
-  // Mark set complete — PR check + show rest timer
+  // Mark set complete  PR check + show rest timer
   void _completeSet(String localId, int index, String exerciseId) {
     final set = _exerciseSets[localId]![index];
 
@@ -143,7 +152,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     });
   }
 
-  // Discard — just pop, nothing was saved to backend
+  // Discard just pop, nothing was saved to backend
   Future<void> _discardWorkout() async {
     final confirmed = await AppDialog.show<bool>(
       context: context,
@@ -162,7 +171,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     if (mounted) Navigator.pop(context);
   }
 
-  // Go to finish screen — backend calls happen there
+  // Go to finish screen  backend calls happen there
   void _goToFinish() {
     Navigator.push(
       context,
@@ -174,6 +183,32 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
         ),
       ),
     );
+  }
+
+  void _addWarmupSet(String localId) {
+    final sets = _exerciseSets[localId] ?? [];
+    if (sets.where((s) => s.isWarmup).length >= 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Maximum 2 warmup sets per exercise'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    if (sets.length >= 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Maximum 10 sets per exercise'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      sets.insert(0, ActiveSet(setNumber: 0, isWarmup: true));
+      _exerciseSets[localId] = sets;
+    });
   }
 
   @override
@@ -248,6 +283,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
                           sets: sets,
                           lastPerformance: lastPerf,
                           onAddSet: () => _addSet(localId),
+                          onAddWarmupSet: () => _addWarmupSet(localId),
                           onRemoveExercise: () => _removeExercise(localId),
                           onSetCompleted: (i) =>
                               _completeSet(localId, i, exercise.id),
