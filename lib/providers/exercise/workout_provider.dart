@@ -267,4 +267,13 @@ class WorkoutProvider extends BaseProvider {
     print('Total workouts fetched: ${_workouts.length}');
     notifyListeners();
   }
+
+  // Fetch last performance for a single exercise by id
+  Future<List<Map<String, dynamic>>?> getLastPerformanceFor(
+    String exerciseId,
+  ) async {
+    final result = await execute(() => _service.getLastPerformance(exerciseId));
+    if (result == null) return null;
+    return List<Map<String, dynamic>>.from(result['lastSets'] ?? []);
+  }
 }
