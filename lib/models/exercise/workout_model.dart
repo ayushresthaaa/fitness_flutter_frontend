@@ -66,8 +66,9 @@ class WorkoutExercise {
   final int? durationSec;
   final int order;
   final String? notes;
+  final int? supersetGroup; // ← added
   final Exercise? exercise;
-  final List<WorkoutSet> workoutSets; // ← ADDED
+  final List<WorkoutSet> workoutSets;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -81,8 +82,9 @@ class WorkoutExercise {
     this.durationSec,
     required this.order,
     this.notes,
+    this.supersetGroup, // ← added
     this.exercise,
-    this.workoutSets = const [], // ← ADDED
+    this.workoutSets = const [],
     required this.createdAt,
     required this.updatedAt,
   });
@@ -98,13 +100,13 @@ class WorkoutExercise {
       durationSec: json['durationSec'],
       order: json['order'] ?? 0,
       notes: json['notes'],
+      supersetGroup: json['supersetGroup'], // ← added
       exercise: json['exercise'] != null
           ? Exercise.fromJson(json['exercise'])
           : null,
-      workoutSets:
-          (json['workoutSets'] as List? ?? []) // ← ADDED
-              .map((s) => WorkoutSet.fromJson(s))
-              .toList(),
+      workoutSets: (json['workoutSets'] as List? ?? [])
+          .map((s) => WorkoutSet.fromJson(s))
+          .toList(),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -121,21 +123,26 @@ class WorkoutExercise {
       'durationSec': durationSec,
       'order': order,
       'notes': notes,
+      'supersetGroup': supersetGroup, // ← added
       'exercise': exercise?.toJson(),
-      'workoutSets': workoutSets.map((s) => s.toJson()).toList(), // ← ADDED
+      'workoutSets': workoutSets.map((s) => s.toJson()).toList(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }
 
-// ← ADDED
 class WorkoutSet {
   final String id;
   final String workoutExerciseId;
   final int setNumber;
   final double? weightKg;
   final int? reps;
+  final int? durationSec;
+  final double? distanceMeters;
+  final int? rpe;
+  final bool isWarmup;
+  final bool isPR;
   final bool isCompleted;
 
   WorkoutSet({
@@ -144,6 +151,11 @@ class WorkoutSet {
     required this.setNumber,
     this.weightKg,
     this.reps,
+    this.durationSec,
+    this.distanceMeters,
+    this.rpe,
+    this.isWarmup = false,
+    this.isPR = false,
     this.isCompleted = false,
   });
 
@@ -154,6 +166,11 @@ class WorkoutSet {
       setNumber: json['setNumber'],
       weightKg: (json['weightKg'] as num?)?.toDouble(),
       reps: json['reps'],
+      durationSec: json['durationSec'],
+      distanceMeters: (json['distanceMeters'] as num?)?.toDouble(),
+      rpe: json['rpe'],
+      isWarmup: json['isWarmup'] ?? false,
+      isPR: json['isPR'] ?? false,
       isCompleted: json['isCompleted'] ?? false,
     );
   }
@@ -165,6 +182,11 @@ class WorkoutSet {
       'setNumber': setNumber,
       'weightKg': weightKg,
       'reps': reps,
+      'durationSec': durationSec,
+      'distanceMeters': distanceMeters,
+      'rpe': rpe,
+      'isWarmup': isWarmup,
+      'isPR': isPR,
       'isCompleted': isCompleted,
     };
   }

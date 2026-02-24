@@ -263,7 +263,7 @@ class _CreateRoutineScreenState extends State<CreateRoutineScreen> {
               MaterialPageRoute(
                 builder: (_) => ExercisePickerScreen(
                   onExercisesSelected: (exercises) {
-                    Navigator.pop(context);
+                    // Navigator.pop(context); removing the pop so no double pop
                     _addExercises(exercises);
                   },
                 ),

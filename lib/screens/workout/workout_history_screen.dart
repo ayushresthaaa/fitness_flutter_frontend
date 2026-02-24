@@ -15,7 +15,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<WorkoutProvider>().fetchWorkouts();
+    context.read<WorkoutProvider>().fetchAllWorkouts();
   }
 
   @override

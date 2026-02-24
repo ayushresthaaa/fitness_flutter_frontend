@@ -1,5 +1,7 @@
 class ApiEndpoints {
+  static const String ip = '192.168.1.76';
   // Base
+  // static const String baseUrl = 'http://192.168.1.76:4000/api';
   static const String baseUrl = 'http://192.168.1.76:4000/api';
 
   //authentication endpoints

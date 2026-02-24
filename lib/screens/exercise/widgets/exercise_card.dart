@@ -17,6 +17,19 @@ class ExerciseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get first image if available
+    String? imageUrl;
+    if (exercise.images.isNotEmpty) {
+      imageUrl = exercise.images[0].replaceAll('localhost', '192.168.1.76');
+    }
+
+    // Format subtitle text
+    final category = _capitalize(exercise.category);
+    final level = _capitalize(exercise.level);
+
+    // Get first 2 muscles as plain text
+    final muscles = exercise.primaryMuscles.take(2).join(', ');
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -27,49 +40,48 @@ class ExerciseCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _ExerciseImage(
-              imageUrl: exercise.images.isNotEmpty
-                  ? exercise.images[0].replaceAll('localhost', '192.168.1.76')
-                  : null,
-            ),
+            _ExerciseImage(imageUrl: imageUrl),
+
             const SizedBox(width: 12),
+
+            /// TEXT PART
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     exercise.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
+
                   const SizedBox(height: 2),
+
                   Text(
-                    '${_capitalize(exercise.category)} · ${_capitalize(exercise.level)}',
+                    '$category · $level',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF6B7280),
                     ),
                   ),
-                  if (exercise.primaryMuscles.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
-                      children: exercise.primaryMuscles
-                          .take(2)
-                          .map((m) => _MuscleTag(label: m))
-                          .toList(),
+
+                  if (muscles.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      muscles,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                     ),
                   ],
                 ],
               ),
             ),
+
             const SizedBox(width: 8),
+
             _AddButton(isSelected: isSelected, onTap: onAdd),
           ],
         ),
@@ -77,9 +89,9 @@ class ExerciseCard extends StatelessWidget {
     );
   }
 
-  String _capitalize(String value) {
-    if (value.isEmpty) return value;
-    return value[0].toUpperCase() + value.substring(1);
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 }
 
@@ -98,59 +110,25 @@ class _ExerciseImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       clipBehavior: Clip.antiAlias,
-      child: imageUrl != null
-          ? Image.network(
+      child: imageUrl == null
+          ? const Icon(Icons.fitness_center, size: 24, color: Color(0xFF2563EB))
+          : Image.network(
               imageUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const _ImageFallback(),
-              loadingBuilder: (_, child, progress) => progress == null
-                  ? child
-                  : const Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Color(0xFF2563EB),
-                        ),
-                      ),
-                    ),
-            )
-          : const _ImageFallback(),
-    );
-  }
-}
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.fitness_center, size: 24),
+              loadingBuilder: (_, child, progress) {
+                if (progress == null) return child;
 
-class _ImageFallback extends StatelessWidget {
-  const _ImageFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Icon(Icons.fitness_center, color: Color(0xFF2563EB), size: 24);
-  }
-}
-
-class _MuscleTag extends StatelessWidget {
-  final String label;
-
-  const _MuscleTag({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F4FF),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11,
-          color: Color(0xFF2563EB),
-          fontWeight: FontWeight.w500,
-        ),
-      ),
+                return const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
@@ -163,20 +141,24 @@ class _AddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = isSelected
+        ? const Color(0xFF2563EB)
+        : const Color(0xFFF0F4FF);
+
+    final iconColor = isSelected ? Colors.white : const Color(0xFF2563EB);
+
+    final icon = isSelected ? Icons.check : Icons.add;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF0F4FF),
+          color: bgColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          isSelected ? Icons.check : Icons.add,
-          size: 18,
-          color: isSelected ? Colors.white : const Color(0xFF2563EB),
-        ),
+        child: Icon(icon, size: 18, color: iconColor),
       ),
     );
   }

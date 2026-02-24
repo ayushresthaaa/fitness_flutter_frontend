@@ -4,6 +4,7 @@ import '../../providers/exercise/workout_provider.dart';
 import '../../providers/achievement/achievement_provider.dart';
 import '../../models/achievement/achievement_model.dart';
 import '../workout/active_workout_screen.dart';
+import '../workout/workout_history_screen.dart';
 import '../routine/routines_screen.dart';
 
 class StartWorkoutScreen extends StatefulWidget {
@@ -23,8 +24,7 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
   }
 
   Future<void> _quickLog() async {
-    final provider = context.read<WorkoutProvider>();
-    await provider.startWorkout();
+    await context.read<WorkoutProvider>().startWorkout();
     if (mounted) {
       Navigator.push(
         context,
@@ -58,66 +58,17 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'QUICK START',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF9E9E9E),
-              letterSpacing: 0.5,
-            ),
-          ),
+          const _SectionLabel('QUICK START'),
           const SizedBox(height: 8),
 
-          // Quick Log — blue card
-          GestureDetector(
-            onTap: _quickLog,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E88E5),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.bolt, color: Colors.white, size: 22),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Quick Log',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Start a blank workout',
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: Colors.white70,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Quick Log — blue
+          _BlueCard(icon: Icons.bolt, title: 'Quick Log', onTap: _quickLog),
           const SizedBox(height: 8),
 
           // From Routine
-          _OptionCard(
+          _SimpleCard(
             icon: Icons.repeat,
             title: 'From Routine',
-            subtitle: 'Pick one of your routines',
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const RoutinesScreen()),
@@ -125,26 +76,33 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
           ),
           const SizedBox(height: 8),
 
-          // Generate with AI
-          _OptionCard(
-            icon: Icons.auto_awesome,
-            title: 'Generate with AI',
-            subtitle: 'Let AI build a routine for you',
-            onTap: null,
-            disabled: true,
+          // Generate with AI — disabled
+          const Opacity(
+            opacity: 0.5,
+            child: _SimpleCard(
+              icon: Icons.auto_awesome,
+              title: 'Generate with AI',
+              onTap: null,
+            ),
           ),
 
           const SizedBox(height: 20),
 
-          const Text(
-            'ACHIEVEMENTS',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF9E9E9E),
-              letterSpacing: 0.5,
+          const _SectionLabel('HISTORY'),
+          const SizedBox(height: 8),
+
+          _SimpleCard(
+            icon: Icons.history,
+            title: 'Workout History',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const WorkoutHistoryScreen()),
             ),
           ),
+
+          const SizedBox(height: 20),
+
+          const _SectionLabel('ACHIEVEMENTS'),
           const SizedBox(height: 8),
 
           if (achievementProvider.isLoading)
@@ -171,67 +129,104 @@ class _StartWorkoutScreenState extends State<StartWorkoutScreen> {
   }
 }
 
-class _OptionCard extends StatelessWidget {
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF9E9E9E),
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+}
+
+class _BlueCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
   final VoidCallback? onTap;
-  final bool disabled;
 
-  const _OptionCard({
+  const _BlueCard({
     required this.icon,
     required this.title,
-    required this.subtitle,
     required this.onTap,
-    this.disabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: disabled ? 0.5 : 1.0,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFF1E88E5), size: 22),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF9E9E9E),
-                      ),
-                    ),
-                  ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E88E5),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 22),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFFBDBDBD),
-                size: 20,
+            ),
+            const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SimpleCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback? onTap;
+
+  const _SimpleCard({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: const Color(0xFF1E88E5), size: 22),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF212121),
+                ),
               ),
-            ],
-          ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFFBDBDBD), size: 20),
+          ],
         ),
       ),
     );
@@ -240,7 +235,6 @@ class _OptionCard extends StatelessWidget {
 
 class _AchievementCard extends StatelessWidget {
   final Achievement achievement;
-
   const _AchievementCard({required this.achievement});
 
   IconData _iconForType(String type) {

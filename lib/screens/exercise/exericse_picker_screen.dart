@@ -16,6 +16,7 @@ class ExercisePickerScreen extends StatefulWidget {
   State<ExercisePickerScreen> createState() => _ExercisePickerScreenState();
 }
 
+//dont register
 class _ExercisePickerScreenState extends State<ExercisePickerScreen> {
   final List<Exercise> _selected = [];
   String? _search;

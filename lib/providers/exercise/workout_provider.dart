@@ -241,4 +241,30 @@ class WorkoutProvider extends BaseProvider {
     _currentWorkout = workout;
     notifyListeners();
   }
+
+  Future<void> fetchAllWorkouts() async {
+    _workouts = [];
+    int page = 1;
+    bool hasMore = true;
+
+    while (hasMore) {
+      final result = await execute(
+        () => _service.getWorkouts(page: page, limit: 50),
+      );
+      if (result == null) break;
+
+      final workoutsPage = (result['workouts'] as List)
+          .map((w) => Workout.fromJson(w))
+          .toList();
+
+      _workouts.addAll(workoutsPage);
+
+      final pagination = result['pagination'];
+      hasMore = pagination['page'] < pagination['totalPages'];
+      page++;
+    }
+
+    print('Total workouts fetched: ${_workouts.length}');
+    notifyListeners();
+  }
 }

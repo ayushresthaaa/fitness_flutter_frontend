@@ -4,7 +4,8 @@ import '../../providers/auth/auth_provider.dart';
 // import '../exercise/exericse_picker_screen.dart';
 // import '../workout/active_workout_screen.dart';
 // import '../../providers/exercise/workout_provider.dart';
-import '../../screens/home/start_workout_screen.dart';
+import '../../screens/exercise/exercise_picker_screen_v2.dart';
+// import '../../screens/home/start_workout_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -239,7 +240,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const StartWorkoutScreen(),
+                            builder: (_) => ExercisePickerScreenV2(
+                              onExercisesSelected: (exercises) {
+                                print(
+                                  'Selected: ${exercises.length} exercises',
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
