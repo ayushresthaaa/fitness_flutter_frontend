@@ -125,6 +125,7 @@ class WorkoutProvider extends BaseProvider {
     double? weightKg,
     int? durationSec,
     String? notes,
+    int? supersetGroup,
   }) async {
     if (_currentWorkout == null) return;
 
@@ -137,6 +138,7 @@ class WorkoutProvider extends BaseProvider {
         weightKg: weightKg,
         durationSec: durationSec,
         notes: notes,
+        supersetGroup: supersetGroup,
       ),
     );
 
@@ -273,6 +275,7 @@ class WorkoutProvider extends BaseProvider {
     String exerciseId,
   ) async {
     final result = await execute(() => _service.getLastPerformance(exerciseId));
+    print('Raw result for $exerciseId: $result');
     if (result == null) return null;
     return List<Map<String, dynamic>>.from(result['lastSets'] ?? []);
   }

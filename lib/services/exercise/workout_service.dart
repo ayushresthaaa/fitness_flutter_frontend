@@ -73,6 +73,7 @@ class WorkoutService {
     double? weightKg,
     int? durationSec,
     String? notes,
+    int? supersetGroup,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.workoutExercises(workoutId),
@@ -83,6 +84,7 @@ class WorkoutService {
         if (weightKg != null) 'weightKg': weightKg,
         if (durationSec != null) 'durationSec': durationSec,
         if (notes != null) 'notes': notes,
+        if (supersetGroup != null) 'supersetGroup': supersetGroup,
       },
     );
     return WorkoutExercise.fromJson(response.data['data']);

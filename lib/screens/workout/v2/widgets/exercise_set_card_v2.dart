@@ -15,7 +15,8 @@ class ExerciseSetCardV2 extends StatelessWidget {
   final Function(int index) onSetCompleted;
   final Function(int index) onSetRemoved;
   final Function(int index, ActiveSet updated) onSetChanged;
-
+  final bool showBackground;
+  final VoidCallback? onLongPress; // for pairing into superset
   const ExerciseSetCardV2({
     super.key,
     required this.exercise,
@@ -27,15 +28,19 @@ class ExerciseSetCardV2 extends StatelessWidget {
     required this.onSetCompleted,
     required this.onSetRemoved,
     required this.onSetChanged,
+    this.onLongPress,
+    this.showBackground = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: showBackground
+          ? BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            )
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -56,27 +61,34 @@ class ExerciseSetCardV2 extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              exercise.name,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF212121),
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                exercise.name,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF212121),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          GestureDetector(
-            onTap: onRemoveExercise,
-            child: const Icon(Icons.close, size: 20, color: Color(0xFFBDBDBD)),
-          ),
-        ],
+            GestureDetector(
+              onTap: onRemoveExercise,
+              child: const Icon(
+                Icons.close,
+                size: 20,
+                color: Color(0xFFBDBDBD),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

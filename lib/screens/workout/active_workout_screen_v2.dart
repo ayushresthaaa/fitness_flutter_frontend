@@ -10,6 +10,7 @@ import 'v2/widgets/active_set_model.dart';
 import 'v2/widgets/exercise_set_card_v2.dart';
 import 'v2/widgets/rest_timer_banner_v2.dart';
 import 'v2/widgets/workout_timer_v2.dart';
+import 'v2/widgets/superset_card_v2.dart';
 
 // Active workout screen
 // Everything is local until user taps Finish
@@ -34,6 +35,8 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
 
   // exerciseId → last performance from backend
   final Map<String, List<Map<String, dynamic>>> _lastPerformance = {};
+  final Map<String, int> _supersetGroups = {}; // localId : group number
+  int _nextSupersetGroup = 1;
 
   bool _showRestTimer = false;
 
@@ -88,6 +91,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     setState(() {
       _exercises.removeWhere((e) => e['localId'] == localId);
       _exerciseSets.remove(localId);
+      _supersetGroups.remove(localId);
     });
   }
 
@@ -180,6 +184,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
           startTime: _startTime,
           exercises: _exercises,
           exerciseSets: _exerciseSets,
+          supersetGroups: _supersetGroups,
         ),
       ),
     );
@@ -209,6 +214,68 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
       sets.insert(0, ActiveSet(setNumber: 0, isWarmup: true));
       _exerciseSets[localId] = sets;
     });
+  }
+
+  // Pair two exercises as superset
+  void _pairAsSuperset(String localIdA, String localIdB) {
+    setState(() {
+      _supersetGroups[localIdA] = _nextSupersetGroup;
+      _supersetGroups[localIdB] = _nextSupersetGroup;
+      _nextSupersetGroup++;
+    });
+  }
+
+  // Remove exercise from superset
+  void _unpair(String localId) {
+    final group = _supersetGroups[localId];
+    setState(() {
+      // Remove all exercises in this group
+      _supersetGroups.removeWhere((key, value) => value == group);
+    });
+  }
+
+  // Show bottom sheet to pick exercise to pair with
+  void _showPairPicker(String localId) {
+    // Other exercises not already in a superset
+    final others = _exercises.where((e) {
+      final id = e['localId'] as String;
+      return id != localId && !_supersetGroups.containsKey(id);
+    }).toList();
+
+    if (others.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No other exercises available to pair'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Pair with...',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          ),
+          for (final item in others)
+            ListTile(
+              title: Text((item['exercise'] as Exercise).name),
+              onTap: () {
+                Navigator.pop(context);
+                _pairAsSuperset(localId, item['localId'] as String);
+              },
+            ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
   }
 
   @override
@@ -267,29 +334,97 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
                       title: 'No exercises yet',
                       subtitle: 'Tap Add Exercise to get started',
                     )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _exercises.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final item = _exercises[index];
-                        final localId = item['localId'] as String;
-                        final exercise = item['exercise'] as Exercise;
-                        final sets = _exerciseSets[localId] ?? [];
-                        final lastPerf = _lastPerformance[exercise.id] ?? [];
+                  : Builder(
+                      builder: (context) {
+                        final List<Widget> items = [];
+                        final Set<String> rendered = {};
 
-                        return ExerciseSetCardV2(
-                          exercise: exercise,
-                          sets: sets,
-                          lastPerformance: lastPerf,
-                          onAddSet: () => _addSet(localId),
-                          onAddWarmupSet: () => _addWarmupSet(localId),
-                          onRemoveExercise: () => _removeExercise(localId),
-                          onSetCompleted: (i) =>
-                              _completeSet(localId, i, exercise.id),
-                          onSetRemoved: (i) => _removeSet(localId, i),
-                          onSetChanged: (i, updated) =>
-                              _updateSet(localId, i, updated),
+                        for (final item in _exercises) {
+                          final localId = item['localId'] as String;
+                          if (rendered.contains(localId)) continue;
+
+                          final group = _supersetGroups[localId];
+
+                          if (group != null) {
+                            final paired = _exercises.firstWhere(
+                              (e) =>
+                                  e['localId'] != localId &&
+                                  _supersetGroups[e['localId']] == group,
+                              orElse: () => item,
+                            );
+                            final pairedId = paired['localId'] as String;
+                            final groupIndex = _supersetGroups.values
+                                .toSet()
+                                .toList()
+                                .indexOf(group);
+                            final label = String.fromCharCode(65 + groupIndex);
+
+                            rendered.add(localId);
+                            rendered.add(pairedId);
+
+                            final exA = item['exercise'] as Exercise;
+                            final exB = paired['exercise'] as Exercise;
+
+                            items.add(
+                              SupersetCardV2(
+                                label: label,
+                                exerciseA: exA,
+                                setsA: _exerciseSets[localId] ?? [],
+                                lastPerfA: _lastPerformance[exA.id] ?? [],
+                                onAddSetA: () => _addSet(localId),
+                                onAddWarmupSetA: () => _addWarmupSet(localId),
+                                onRemoveExerciseA: () =>
+                                    _removeExercise(localId),
+                                onSetCompletedA: (i) =>
+                                    _completeSet(localId, i, exA.id),
+                                onSetRemovedA: (i) => _removeSet(localId, i),
+                                onSetChangedA: (i, u) =>
+                                    _updateSet(localId, i, u),
+                                exerciseB: exB,
+                                setsB: _exerciseSets[pairedId] ?? [],
+                                lastPerfB: _lastPerformance[exB.id] ?? [],
+                                onAddSetB: () => _addSet(pairedId),
+                                onAddWarmupSetB: () => _addWarmupSet(pairedId),
+                                onRemoveExerciseB: () =>
+                                    _removeExercise(pairedId),
+                                onSetCompletedB: (i) =>
+                                    _completeSet(pairedId, i, exB.id),
+                                onSetRemovedB: (i) => _removeSet(pairedId, i),
+                                onSetChangedB: (i, u) =>
+                                    _updateSet(pairedId, i, u),
+                                onUnpair: () => _unpair(localId),
+                              ),
+                            );
+                          } else {
+                            rendered.add(localId);
+                            final exercise = item['exercise'] as Exercise;
+                            items.add(
+                              ExerciseSetCardV2(
+                                exercise: exercise,
+                                sets: _exerciseSets[localId] ?? [],
+                                lastPerformance:
+                                    _lastPerformance[exercise.id] ?? [],
+                                onAddSet: () => _addSet(localId),
+                                onAddWarmupSet: () => _addWarmupSet(localId),
+                                onRemoveExercise: () =>
+                                    _removeExercise(localId),
+                                onSetCompleted: (i) =>
+                                    _completeSet(localId, i, exercise.id),
+                                onSetRemoved: (i) => _removeSet(localId, i),
+                                onSetChanged: (i, u) =>
+                                    _updateSet(localId, i, u),
+                                onLongPress: () => _showPairPicker(localId),
+                              ),
+                            );
+                          }
+                        }
+
+                        return ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: items.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (_, i) => items[i],
                         );
                       },
                     ),

@@ -9,12 +9,13 @@ class FinishWorkoutScreenV2 extends StatefulWidget {
   final DateTime startTime;
   final List<Map<String, dynamic>> exercises; // { localId, exercise }
   final Map<String, List<ActiveSet>> exerciseSets; // localId → sets
-
+  final Map<String, int> supersetGroups;
   const FinishWorkoutScreenV2({
     super.key,
     required this.startTime,
     required this.exercises,
     required this.exerciseSets,
+    required this.supersetGroups,
   });
 
   @override
@@ -50,14 +51,20 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
 
     //  Add exercises one by one and map localId → real workoutExerciseId
     final Map<String, String> localIdToWorkoutExerciseId = {};
-
+    print('exercises count: ${widget.exercises.length}');
+    print('exerciseSets keys: ${widget.exerciseSets.keys.toList()}');
     for (final item in widget.exercises) {
       final exercise = item['exercise'] as Exercise;
       final localId = item['localId'] as String;
       final sets = widget.exerciseSets[localId] ?? [];
+      print('localId: $localId sets count: ${sets.length}');
       if (sets.isEmpty) continue;
 
-      await provider.addExerciseToWorkout(exerciseId: exercise.id);
+      final supersetGroup = widget.supersetGroups[localId];
+      await provider.addExerciseToWorkout(
+        exerciseId: exercise.id,
+        supersetGroup: supersetGroup,
+      );
 
       // provider refreshes currentWorkout after each add, last exercise is the one we just added
       final addedId = provider.currentWorkout!.exercises.last.id;
@@ -76,6 +83,7 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
 
       final setPayload = <Map<String, dynamic>>[];
       for (final s in sets) {
+        print('Set payload: weightKg=${s.weightKg} reps=${s.reps}');
         setPayload.add({
           'setNumber': s.setNumber,
           'weightKg': s.weightKg,

@@ -24,12 +24,7 @@ class SetRowV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 6),
-      padding: EdgeInsets.fromLTRB(
-        set.isWarmup ? 8 : 0,
-        4,
-        set.isWarmup ? 8 : 0,
-        4,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: set.isWarmup
           ? BoxDecoration(
               color: const Color(0xFFFFF8F0),
@@ -61,6 +56,7 @@ class SetRowV2 extends StatelessWidget {
               value: set.weightKg?.toString() ?? '',
               hint: '0',
               onChanged: (val) {
+                print('kg val: "$val" parsed: ${double.tryParse(val)}');
                 onChanged(set.copyWith(weightKg: double.tryParse(val)));
               },
             ),
@@ -164,7 +160,7 @@ class _WarmupBadge extends StatelessWidget {
     return Container(
       height: 24,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3E0),
+        color: const Color(0xFFFFF8F0),
         borderRadius: BorderRadius.circular(6),
       ),
       alignment: Alignment.center,
