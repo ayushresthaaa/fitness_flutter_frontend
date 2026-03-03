@@ -394,7 +394,11 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
 
                           final group = _supersetGroups[localId];
 
-                          if (group != null) {
+                          final groupCount = _supersetGroups.values
+                              .where((g) => g == group)
+                              .length;
+
+                          if (group != null && groupCount >= 2) {
                             final paired = _exercises.firstWhere(
                               (e) =>
                                   e['localId'] != localId &&
