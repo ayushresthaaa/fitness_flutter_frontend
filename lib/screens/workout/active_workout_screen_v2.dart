@@ -20,10 +20,14 @@ class ActiveWorkoutScreenV2 extends StatefulWidget {
   final List<Map<String, dynamic>>?
   prefilledExercises; // {exercise, localId, supersetGroup}
   final String? workoutTitle;
+  final String? routineId; // add
+  final List<Map<String, dynamic>>? originalExercises;
   const ActiveWorkoutScreenV2({
     super.key,
     this.prefilledExercises,
     this.workoutTitle,
+    this.routineId, // add
+    this.originalExercises,
   });
 
   @override
@@ -234,6 +238,9 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
           exercises: _exercises,
           exerciseSets: _exerciseSets,
           supersetGroups: _supersetGroups,
+          routineId: widget.routineId, // add
+          originalExercises: widget.originalExercises, // add
+          workoutTitle: widget.workoutTitle,
         ),
       ),
     );

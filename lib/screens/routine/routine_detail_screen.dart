@@ -232,6 +232,15 @@ class _RoutineDetailScreenState extends State<RoutineDetailScreen> {
           builder: (_) => ActiveWorkoutScreenV2(
             workoutTitle: routine.name,
             prefilledExercises: prefilled,
+            routineId: routine.id,
+            originalExercises: routine.exercises
+                .map(
+                  (e) => {
+                    'exerciseId': e.exerciseId,
+                    'name': e.exercise?.name ?? '',
+                  },
+                )
+                .toList(),
           ),
         ),
       );

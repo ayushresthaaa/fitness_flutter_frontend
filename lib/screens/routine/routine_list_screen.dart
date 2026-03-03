@@ -27,11 +27,15 @@ class _RoutineListScreenState extends State<RoutineListScreen> {
     });
   }
 
-  void _createRoutine() {
-    Navigator.push(
+  void _createRoutine() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const CreateRoutineScreen()),
     );
+    // Refresh list when coming back
+    if (mounted) {
+      context.read<RoutineProvider>().fetchRoutines();
+    }
   }
 
   Future<void> _startWorkout(String routineId) async {
@@ -60,6 +64,15 @@ class _RoutineListScreenState extends State<RoutineListScreen> {
           builder: (_) => ActiveWorkoutScreenV2(
             workoutTitle: routine.name,
             prefilledExercises: prefilled,
+            routineId: routine.id, // add
+            originalExercises: routine.exercises
+                .map(
+                  (e) => {
+                    'exerciseId': e.exerciseId,
+                    'name': e.exercise?.name ?? '',
+                  },
+                )
+                .toList(), // add
           ),
         ),
       );
@@ -112,14 +125,18 @@ class _RoutineListScreenState extends State<RoutineListScreen> {
               final routine = provider.routines[i];
               return RoutineCard(
                 routine: routine,
-                onTap: () {
+                onTap: () async {
                   provider.fetchRoutineById(routine.id);
-                  Navigator.push(
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const RoutineDetailScreen(),
                     ),
                   );
+                  // Refresh list when coming back
+                  if (mounted) {
+                    context.read<RoutineProvider>().fetchRoutines();
+                  }
                 },
                 onStart: () => _startWorkout(routine.id),
               );
