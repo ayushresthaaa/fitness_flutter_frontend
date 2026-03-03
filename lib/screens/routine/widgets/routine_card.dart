@@ -1,0 +1,146 @@
+import 'package:flutter/material.dart';
+import '../../../models/routine/routine_model.dart';
+import '../../../widgets/common.dart';
+
+// Card shown in routine list screen
+// Tap to open detail, start button to begin workout immediately
+class RoutineCard extends StatelessWidget {
+  final Routine routine;
+  final VoidCallback onTap;
+  final VoidCallback onStart;
+
+  const RoutineCard({
+    super.key,
+    required this.routine,
+    required this.onTap,
+    required this.onStart,
+  });
+
+  List<String> get _muscles {
+    final seen = <String>{};
+    final result = <String>[];
+    for (final re in routine.exercises) {
+      for (final m in re.exercise?.primaryMuscles ?? []) {
+        if (seen.add(m)) result.add(m);
+        if (result.length >= 3) return result;
+      }
+    }
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final muscles = _muscles;
+    final count = routine.exercises.length;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: kWhite,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Name + exercise count
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    routine.name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: kTextDark,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  '$count ${count == 1 ? 'exercise' : 'exercises'}',
+                  style: const TextStyle(fontSize: 12, color: kTextGrey),
+                ),
+              ],
+            ),
+
+            // Description
+            if (routine.description != null && routine.description!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  routine.description!,
+                  style: const TextStyle(fontSize: 12, color: kTextGrey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+            // Muscle chips
+            if (muscles.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Wrap(
+                  spacing: 6,
+                  children: muscles
+                      .map(
+                        (m) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: kPrimaryLight,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            m,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: kPrimary,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+
+            const SizedBox(height: 12),
+
+            // Start workout button
+            GestureDetector(
+              onTap: onStart,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: kPrimary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.play_arrow_rounded, size: 16, color: kWhite),
+                    SizedBox(width: 4),
+                    Text(
+                      'Start Workout',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: kWhite,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

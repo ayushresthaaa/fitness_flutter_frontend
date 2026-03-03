@@ -63,7 +63,7 @@ class RoutineExercise {
   final Exercise? exercise;
   final DateTime createdAt;
   final DateTime updatedAt;
-
+  final int? supersetGroup;
   RoutineExercise({
     required this.id,
     required this.routineId,
@@ -77,6 +77,7 @@ class RoutineExercise {
     this.exercise,
     required this.createdAt,
     required this.updatedAt,
+    this.supersetGroup,
   });
 
   factory RoutineExercise.fromJson(Map<String, dynamic> json) {
@@ -95,6 +96,7 @@ class RoutineExercise {
           : null,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      supersetGroup: json['supersetGroup'] as int?,
     );
   }
 
@@ -112,6 +114,7 @@ class RoutineExercise {
       'exercise': exercise?.toJson(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'supersetGroup': supersetGroup,
     };
   }
 }

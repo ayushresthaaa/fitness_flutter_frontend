@@ -11,10 +11,12 @@ class SetRowV2 extends StatelessWidget {
   final Function(ActiveSet updated) onChanged;
   final VoidCallback onCompleted;
   final VoidCallback onRemoved;
+  final bool isCardio;
 
   const SetRowV2({
     super.key,
     required this.set,
+    required this.isCardio,
     required this.onChanged,
     required this.onCompleted,
     required this.onRemoved,
@@ -50,31 +52,41 @@ class SetRowV2 extends StatelessWidget {
           ),
           const SizedBox(width: 8),
 
-          // kg input
+          // First input — kg or mins
           Expanded(
             child: SetInputV2(
-              value: set.weightKg?.toString() ?? '',
-              hint: '0',
+              value: isCardio
+                  ? (set.durationSec?.toString() ?? '')
+                  : (set.weightKg?.toString() ?? ''),
+              hint: isCardio ? 'mins' : '0',
               onChanged: (val) {
-                print('kg val: "$val" parsed: ${double.tryParse(val)}');
-                onChanged(set.copyWith(weightKg: double.tryParse(val)));
+                if (isCardio) {
+                  onChanged(set.copyWith(durationSec: double.tryParse(val)));
+                } else {
+                  onChanged(set.copyWith(weightKg: double.tryParse(val)));
+                }
               },
             ),
           ),
           const SizedBox(width: 8),
 
-          // reps input
+          // Second input — reps or km
           Expanded(
             child: SetInputV2(
-              value: set.reps?.toString() ?? '',
-              hint: 'reps',
+              value: isCardio
+                  ? (set.distanceMeters?.toString() ?? '')
+                  : (set.reps?.toString() ?? ''),
+              hint: isCardio ? 'dist' : 'reps',
               onChanged: (val) {
-                onChanged(set.copyWith(reps: int.tryParse(val)));
+                if (isCardio) {
+                  onChanged(set.copyWith(distanceMeters: double.tryParse(val)));
+                } else {
+                  onChanged(set.copyWith(reps: int.tryParse(val)));
+                }
               },
             ),
           ),
           const SizedBox(width: 8),
-
           // RPE cell, tap to open picker
           Expanded(
             child: GestureDetector(

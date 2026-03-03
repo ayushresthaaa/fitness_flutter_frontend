@@ -81,6 +81,7 @@ class RoutineService {
     double? weightKg,
     int? restSec,
     String? notes,
+    int? supersetGroup,
   }) async {
     final response = await _dio.post(
       ApiEndpoints.routineExercises(routineId),
@@ -91,6 +92,7 @@ class RoutineService {
         if (weightKg != null) 'weightKg': weightKg,
         if (restSec != null) 'restSec': restSec,
         if (notes != null) 'notes': notes,
+        if (supersetGroup != null) 'supersetGroup': supersetGroup,
       },
     );
     return RoutineExercise.fromJson(response.data['data']);
@@ -105,6 +107,7 @@ class RoutineService {
     double? weightKg,
     int? restSec,
     String? notes,
+    int? supersetGroup,
   }) async {
     final response = await _dio.put(
       ApiEndpoints.routineExerciseById(routineId, exerciseId),
@@ -114,6 +117,7 @@ class RoutineService {
         if (weightKg != null) 'weightKg': weightKg,
         if (restSec != null) 'restSec': restSec,
         if (notes != null) 'notes': notes,
+        if (supersetGroup != null) 'supersetGroup': supersetGroup,
       },
     );
     return RoutineExercise.fromJson(response.data['data']);

@@ -16,6 +16,7 @@ class ExerciseSetCardV2 extends StatelessWidget {
   final Function(int index) onSetRemoved;
   final Function(int index, ActiveSet updated) onSetChanged;
   final bool showBackground;
+  bool get isCardio => exercise.category == 'cardio';
   final VoidCallback? onLongPress; // for pairing into superset
   const ExerciseSetCardV2({
     super.key,
@@ -50,6 +51,7 @@ class ExerciseSetCardV2 extends StatelessWidget {
           for (int i = 0; i < sets.length; i++)
             SetRowV2(
               set: sets[i],
+              isCardio: isCardio, // ← add this
               onChanged: (updated) => onSetChanged(i, updated),
               onCompleted: () => onSetCompleted(i),
               onRemoved: () => onSetRemoved(i),
@@ -107,8 +109,13 @@ class ExerciseSetCardV2 extends StatelessWidget {
             for (int i = 0; i < lastPerformance.length; i++)
               _LastPerfPill(
                 label: 'S${i + 1}',
+                isCardio: isCardio, // ← add
                 weightKg: (lastPerformance[i]['weightKg'] as num?)?.toDouble(),
                 reps: lastPerformance[i]['reps'] as int?,
+                durationSec: (lastPerformance[i]['durationSec'] as num?)
+                    ?.toDouble(), // ← add
+                distanceMeters: (lastPerformance[i]['distanceMeters'] as num?)
+                    ?.toDouble(), // ← add
               ),
           ],
         ),
@@ -117,20 +124,20 @@ class ExerciseSetCardV2 extends StatelessWidget {
   }
 
   Widget _buildColumnLabels() {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(14, 0, 14, 6),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 6),
       child: Row(
         children: [
-          SizedBox(width: 30, child: _ColLabel('SET')),
-          SizedBox(width: 8),
-          Expanded(child: _ColLabel('KG (0=BW)')),
-          SizedBox(width: 8),
-          Expanded(child: _ColLabel('REPS')),
-          SizedBox(width: 8),
-          Expanded(child: _ColLabel('RPE')),
-          SizedBox(width: 8),
-          SizedBox(width: 38, child: _ColLabel('DONE')),
-          SizedBox(width: 20),
+          const SizedBox(width: 30, child: _ColLabel('SET')),
+          const SizedBox(width: 8),
+          Expanded(child: _ColLabel(isCardio ? 'MINS' : 'KG (0=BW)')),
+          const SizedBox(width: 8),
+          Expanded(child: _ColLabel(isCardio ? 'DIST' : 'REPS')),
+          const SizedBox(width: 8),
+          const Expanded(child: _ColLabel('RPE')),
+          const SizedBox(width: 8),
+          const SizedBox(width: 38, child: _ColLabel('DONE')),
+          const SizedBox(width: 20),
         ],
       ),
     );
@@ -253,14 +260,27 @@ class _LastPerfPill extends StatelessWidget {
   final String label;
   final double? weightKg;
   final int? reps;
-
-  const _LastPerfPill({required this.label, this.weightKg, this.reps});
+  final double? durationSec; //  add
+  final double? distanceMeters; //
+  final bool isCardio;
+  const _LastPerfPill({
+    required this.label,
+    this.weightKg,
+    this.reps,
+    this.durationSec,
+    this.distanceMeters,
+    this.isCardio = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final text = weightKg != null && reps != null
-        ? '$label: ${weightKg}kg×$reps'
-        : label;
+    final text = isCardio
+        ? (durationSec != null
+              ? '$label: ${durationSec}mins ${distanceMeters ?? 0}km'
+              : label)
+        : (weightKg != null && reps != null
+              ? '$label: ${weightKg}kg×$reps'
+              : label);
 
     return Container(
       margin: const EdgeInsets.only(right: 6),

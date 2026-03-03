@@ -92,6 +92,8 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
           'isWarmup': s.isWarmup,
           'isPR': s.isPR,
           'isCompleted': s.isCompleted,
+          'durationSec': s.durationSec,
+          'distanceMeters': s.distanceMeters,
         });
       }
       exerciseSets.add({

@@ -137,6 +137,7 @@ class RoutineProvider extends BaseProvider {
     double? weightKg,
     int? restSec,
     String? notes,
+    int? supersetGroup,
   }) async {
     if (_selectedRoutine == null) return;
 
@@ -149,6 +150,7 @@ class RoutineProvider extends BaseProvider {
         weightKg: weightKg,
         restSec: restSec,
         notes: notes,
+        supersetGroup: supersetGroup,
       ),
     );
 
@@ -166,6 +168,7 @@ class RoutineProvider extends BaseProvider {
     double? weightKg,
     int? restSec,
     String? notes,
+    int? supersetGroup,
   }) async {
     if (_selectedRoutine == null) return;
 
@@ -178,6 +181,7 @@ class RoutineProvider extends BaseProvider {
         weightKg: weightKg,
         restSec: restSec,
         notes: notes,
+        supersetGroup: supersetGroup,
       ),
     );
 

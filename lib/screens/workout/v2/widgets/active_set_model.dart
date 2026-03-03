@@ -8,7 +8,8 @@ class ActiveSet {
   bool isWarmup; // warmup sets show W instead of set number
   bool isPR; // personal record, shows trophy badge
   bool isCompleted;
-
+  double? durationSec;
+  double? distanceMeters;
   ActiveSet({
     required this.setNumber,
     this.weightKg,
@@ -17,6 +18,8 @@ class ActiveSet {
     this.isWarmup = false,
     this.isPR = false,
     this.isCompleted = false,
+    this.durationSec,
+    this.distanceMeters,
   });
 
   // Copy with updated values
@@ -28,6 +31,8 @@ class ActiveSet {
     bool? isWarmup,
     bool? isPR,
     bool? isCompleted,
+    double? durationSec,
+    double? distanceMeters,
   }) {
     return ActiveSet(
       setNumber: setNumber ?? this.setNumber,
@@ -37,6 +42,10 @@ class ActiveSet {
       isWarmup: isWarmup ?? this.isWarmup,
       isPR: isPR ?? this.isPR,
       isCompleted: isCompleted ?? this.isCompleted,
+      durationSec: durationSec != null ? durationSec : this.durationSec,
+      distanceMeters: distanceMeters != null
+          ? distanceMeters
+          : this.distanceMeters,
     );
   }
 }

@@ -16,7 +16,15 @@ import 'v2/widgets/superset_card_v2.dart';
 // Everything is local until user taps Finish
 // No backend calls here at all
 class ActiveWorkoutScreenV2 extends StatefulWidget {
-  const ActiveWorkoutScreenV2({super.key});
+  //parameter for the workout start
+  final List<Map<String, dynamic>>?
+  prefilledExercises; // {exercise, localId, supersetGroup}
+  final String? workoutTitle;
+  const ActiveWorkoutScreenV2({
+    super.key,
+    this.prefilledExercises,
+    this.workoutTitle,
+  });
 
   @override
   State<ActiveWorkoutScreenV2> createState() => _ActiveWorkoutScreenV2State();
@@ -36,9 +44,41 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
   // exerciseId → last performance from backend
   final Map<String, List<Map<String, dynamic>>> _lastPerformance = {};
   final Map<String, int> _supersetGroups = {}; // localId : group number
+
   int _nextSupersetGroup = 1;
 
   bool _showRestTimer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefilledExercises != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        for (final item in widget.prefilledExercises!) {
+          final exercise = item['exercise'] as Exercise;
+          final localId = item['localId'] as String;
+          final supersetGroup = item['supersetGroup'] as int?;
+          final sets = item['sets'] as int? ?? 3;
+
+          setState(() {
+            _exercises.add({'localId': localId, 'exercise': exercise});
+            _exerciseSets[localId] = List.generate(
+              sets,
+              (i) => ActiveSet(setNumber: i + 1),
+            );
+            if (supersetGroup != null && supersetGroup > 0) {
+              _supersetGroups[localId] = supersetGroup;
+              if (supersetGroup >= _nextSupersetGroup) {
+                _nextSupersetGroup = supersetGroup + 1;
+              }
+            }
+          });
+
+          await _fetchLastPerf(exercise.id);
+        }
+      });
+    }
+  }
 
   // Open picker, add selected exercises locally
   Future<void> _addExercise() async {
@@ -135,13 +175,22 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
   // Mark set complete  PR check + show rest timer
   void _completeSet(String localId, int index, String exerciseId) {
     final set = _exerciseSets[localId]![index];
+    final exercise =
+        _exercises.firstWhere((e) => e['localId'] == localId)['exercise']
+            as Exercise;
+    final isCardio = exercise.category == 'cardio';
 
-    // Don't allow completing if kg or reps are empty
-    if (set.weightKg == null || set.reps == null) return;
+    // Validate based on type
+    if (isCardio) {
+      if (set.durationSec == null) return;
+    } else {
+      if (set.weightKg == null || set.reps == null) return;
+    }
 
+    // PR check only for strength
     final lastSets = _lastPerformance[exerciseId] ?? [];
     bool isPR = false;
-    if (index < lastSets.length) {
+    if (!isCardio && index < lastSets.length) {
       final lastWeight = (lastSets[index]['weightKg'] as num?)?.toDouble() ?? 0;
       isPR = set.weightKg! > lastWeight;
     }
@@ -283,7 +332,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     return Scaffold(
       backgroundColor: kBackground,
       appBar: AppTopBar(
-        title: 'My Workout',
+        title: widget.workoutTitle ?? 'My Workout',
         onBack: _discardWorkout,
         actions: [
           // Timer starts from when screen opened
