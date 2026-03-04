@@ -69,6 +69,11 @@ class ApiEndpoints {
   static String exerciseProgress(String exerciseId) =>
       '/progress/exercise/$exerciseId'; // GET
 
+  // History endpoints
+  static const String history = '/history';
+  static const String historySearch = '/history/search';
+  static const String historyStreak = '/history/streak';
+  static const String historyMonthlyStats = '/history/monthly-stats';
   //ahievements api endpoints
   static const String achievements = '/achievements'; // GET
   static const String checkAchievements = '/achievements/check'; // POST

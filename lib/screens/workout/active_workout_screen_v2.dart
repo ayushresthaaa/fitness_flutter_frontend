@@ -176,7 +176,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     setState(() => _exerciseSets[localId]![index] = updated);
   }
 
-  // Mark set complete  PR check + show rest timer
+  // Mark set complete  PR check, show rest timer
   void _completeSet(String localId, int index, String exerciseId) {
     final set = _exerciseSets[localId]![index];
     final exercise =
@@ -228,18 +228,43 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
     if (mounted) Navigator.pop(context);
   }
 
-  // Go to finish screen  backend calls happen there
   void _goToFinish() {
+    // Check if there are any completed sets at all
+    final hasCompletedSets = _exerciseSets.values.any(
+      (sets) => sets.any((s) => s.isCompleted),
+    );
+
+    if (!hasCompletedSets) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Complete at least one set before finishing'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final filteredSets = Map<String, List<ActiveSet>>.fromEntries(
+      _exerciseSets.entries.map((entry) {
+        final validSets = entry.value.where((s) {
+          if (s.isWarmup) return s.weightKg != null && s.reps != null;
+          if (!s.isCompleted) return false;
+          return true;
+        }).toList();
+        return MapEntry(entry.key, validSets);
+      }),
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => FinishWorkoutScreenV2(
           startTime: _startTime,
           exercises: _exercises,
-          exerciseSets: _exerciseSets,
+          exerciseSets: filteredSets,
           supersetGroups: _supersetGroups,
-          routineId: widget.routineId, // add
-          originalExercises: widget.originalExercises, // add
+          routineId: widget.routineId,
+          originalExercises: widget.originalExercises,
           workoutTitle: widget.workoutTitle,
         ),
       ),

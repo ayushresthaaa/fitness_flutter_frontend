@@ -1,3 +1,4 @@
+import 'package:fitness_app/screens/history/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
@@ -8,6 +9,7 @@ import '../../screens/exercise/exercise_picker_screen_v2.dart';
 // import '../../screens/home/start_workout_screen.dart';
 import '../../screens/workout/active_workout_screen_v2.dart';
 import '../../screens/routine/routine_list_screen.dart';
+import '../../screens/weekly_program/weekly_program_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -242,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const RoutineListScreen(),
+                            builder: (_) => const HistoryScreen(),
                           ),
                         ),
                       ),
@@ -272,9 +274,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(width: 16),
                     Expanded(
                       child: _buildQuickActionCard(
-                        icon: Icons.shopping_cart,
-                        label: 'Shop',
-                        onTap: () {},
+                        icon: Icons.calendar_month_rounded,
+                        label: 'My Program',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const WeeklyProgramScreen(),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -408,8 +415,8 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'Workout',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today, size: 28),
-              label: 'Schedule',
+              icon: Icon(Icons.shopping_cart, size: 28),
+              label: 'Shop',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.account_circle, size: 28),

@@ -90,7 +90,9 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
       if (sets.isEmpty) continue;
 
       final setPayload = <Map<String, dynamic>>[];
+
       for (final s in sets) {
+        if (!s.isCompleted) continue; // Only save completed sets
         setPayload.add({
           'setNumber': s.setNumber,
           'weightKg': s.weightKg,
