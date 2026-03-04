@@ -50,7 +50,12 @@ class ApiEndpoints {
       '/routines/$routineId/exercises'; // POST
 
   static String routineExerciseById(String routineId, String exerciseId) =>
-      '/routines/$routineId/exercises/$exerciseId'; // PUT, DELETE
+      '/routines/$routineId/exercises/$exerciseId'; // PUT, DELETE),
+
+  // Weekly Program endpoints
+  static const String weeklyProgram = '/weekly-program';
+  static const String weeklyProgramToday = '/weekly-program/today';
+  static String weeklyProgramDay(String dayId) => '/weekly-program/days/$dayId';
 
   //progress api endpoints
   static const String progressStats = '/progress/stats'; // GET

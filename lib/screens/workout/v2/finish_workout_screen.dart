@@ -249,12 +249,20 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
     );
   }
 
-  int get _totalSets {
+  int get _completedSets {
     int count = 0;
     for (final sets in widget.exerciseSets.values) {
       for (final s in sets) {
         if (s.isCompleted) count++;
       }
+    }
+    return count;
+  }
+
+  int get _totalSets {
+    int count = 0;
+    for (final sets in widget.exerciseSets.values) {
+      count += sets.where((s) => !s.isWarmup).length;
     }
     return count;
   }
@@ -298,7 +306,7 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
                           ),
                           _SummaryItem(
                             label: 'Sets Done',
-                            value: '$_totalSets',
+                            value: '$_completedSets/$_totalSets',
                           ),
                         ],
                       ),
