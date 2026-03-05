@@ -57,23 +57,16 @@ class ApiEndpoints {
   static const String weeklyProgramToday = '/weekly-program/today';
   static String weeklyProgramDay(String dayId) => '/weekly-program/days/$dayId';
 
-  //progress api endpoints
-  static const String progressStats = '/progress/stats'; // GET
-  static const String progressStreak = '/progress/streak'; // GET
-  static const String progressWeekly = '/progress/weekly'; // GET
-  static const String progressMonthly = '/progress/monthly'; // GET
-  static const String progressMuscles = '/progress/muscles'; // GET
-  static const String progressPersonalBests = '/progress/personal-bests'; // GET
-  static const String progressHistory = '/progress/history'; // GET
-
-  static String exerciseProgress(String exerciseId) =>
-      '/progress/exercise/$exerciseId'; // GET
+  //progress endpoints
+  static const String personalBests = '/progress/personal-bests';
+  static String exerciseProgress(String id) => '/progress/exercise/$id';
 
   // History endpoints
   static const String history = '/history';
   static const String historySearch = '/history/search';
   static const String historyStreak = '/history/streak';
   static const String historyMonthlyStats = '/history/monthly-stats';
+
   //ahievements api endpoints
   static const String achievements = '/achievements'; // GET
   static const String checkAchievements = '/achievements/check'; // POST

@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import '../../../models/exercise/history_model.dart';
 import '../../../widgets/common.dart';
 
-// Workout card shown below calendar when a day is selected
-// Also used in search results
-// Tap to open full detail screen
 class WorkoutHistoryCard extends StatelessWidget {
   final WorkoutHistory workout;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onCopy;
+  final VoidCallback? onSaveAsRoutine;
   final VoidCallback? onDelete;
 
   const WorkoutHistoryCard({
     super.key,
     required this.workout,
     required this.onTap,
+    this.onEdit,
+    this.onCopy,
+    this.onSaveAsRoutine,
     this.onDelete,
   });
 
@@ -82,25 +85,83 @@ class WorkoutHistoryCard extends StatelessWidget {
                     ),
                   ),
 
-                // Delete button
-                if (onDelete != null)
-                  GestureDetector(
-                    onTap: onDelete,
-                    child: const Padding(
-                      padding: EdgeInsets.only(left: 8),
-                      child: Icon(
-                        Icons.delete_outline,
-                        size: 18,
-                        color: kTextHint,
+                // ⋮ menu
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, size: 18, color: kTextHint),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') onEdit?.call();
+                    if (value == 'copy') onCopy?.call();
+                    if (value == 'routine') onSaveAsRoutine?.call();
+                    if (value == 'delete') onDelete?.call();
+                  },
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 16, color: kTextDark),
+                          SizedBox(width: 10),
+                          Text(
+                            'Edit',
+                            style: TextStyle(fontSize: 13, color: kTextDark),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    const PopupMenuItem(
+                      value: 'copy',
+                      child: Row(
+                        children: [
+                          Icon(Icons.copy_outlined, size: 16, color: kTextDark),
+                          SizedBox(width: 10),
+                          Text(
+                            'Copy Workout',
+                            style: TextStyle(fontSize: 13, color: kTextDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'routine',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.bookmark_outline,
+                            size: 16,
+                            color: kTextDark,
+                          ),
+                          SizedBox(width: 10),
+                          Text(
+                            'Save as Routine',
+                            style: TextStyle(fontSize: 13, color: kTextDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, size: 16, color: kRed),
+                          SizedBox(width: 10),
+                          Text(
+                            'Delete',
+                            style: TextStyle(fontSize: 13, color: kRed),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
 
             const SizedBox(height: 8),
 
-            // Stats row — exercises, duration, volume
+            // Stats row
             Row(
               children: [
                 _StatChip(

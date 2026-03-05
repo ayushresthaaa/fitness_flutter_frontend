@@ -1,127 +1,17 @@
-import '../exercise/exercise_model.dart';
-import '../exercise/workout_model.dart';
-
-// Overall Stats
-class OverallStats {
-  final int totalWorkouts;
-  final int totalDurationMins;
-  final int avgDurationMins;
-  final int totalExercisesLogged;
-  final int totalSets;
-
-  OverallStats({
-    required this.totalWorkouts,
-    required this.totalDurationMins,
-    required this.avgDurationMins,
-    required this.totalExercisesLogged,
-    required this.totalSets,
-  });
-
-  factory OverallStats.fromJson(Map<String, dynamic> json) {
-    return OverallStats(
-      totalWorkouts: json['totalWorkouts'] ?? 0,
-      totalDurationMins: json['totalDurationMins'] ?? 0,
-      avgDurationMins: json['avgDurationMins'] ?? 0,
-      totalExercisesLogged: json['totalExercisesLogged'] ?? 0,
-      totalSets: json['totalSets'] ?? 0,
-    );
-  }
-}
-
-// Streak
-class Streak {
-  final int currentStreak;
-  final int longestStreak;
-
-  Streak({required this.currentStreak, required this.longestStreak});
-
-  factory Streak.fromJson(Map<String, dynamic> json) {
-    return Streak(
-      currentStreak: json['currentStreak'] ?? 0,
-      longestStreak: json['longestStreak'] ?? 0,
-    );
-  }
-}
-
-// Weekly Stats
-class WeeklyDay {
-  final String date;
-  final String day;
-  final int workouts;
-  final int durationMins;
-
-  WeeklyDay({
-    required this.date,
-    required this.day,
-    required this.workouts,
-    required this.durationMins,
-  });
-
-  factory WeeklyDay.fromJson(Map<String, dynamic> json) {
-    return WeeklyDay(
-      date: json['date'],
-      day: json['day'],
-      workouts: json['workouts'] ?? 0,
-      durationMins: json['durationMins'] ?? 0,
-    );
-  }
-}
-
-// Monthly Stats
-class MonthlyData {
-  final String label;
-  final int month;
-  final int year;
-  final int workouts;
-
-  MonthlyData({
-    required this.label,
-    required this.month,
-    required this.year,
-    required this.workouts,
-  });
-
-  factory MonthlyData.fromJson(Map<String, dynamic> json) {
-    return MonthlyData(
-      label: json['label'],
-      month: json['month'],
-      year: json['year'],
-      workouts: json['workouts'] ?? 0,
-    );
-  }
-}
-
-// Muscle Distribution
-class MuscleDistribution {
-  final String muscle;
-  final int count;
-  final int percentage;
-
-  MuscleDistribution({
-    required this.muscle,
-    required this.count,
-    required this.percentage,
-  });
-
-  factory MuscleDistribution.fromJson(Map<String, dynamic> json) {
-    return MuscleDistribution(
-      muscle: json['muscle'],
-      count: json['count'] ?? 0,
-      percentage: json['percentage'] ?? 0,
-    );
-  }
-}
-
-// Personal Best
+// Personal Best — used in PR list screen
 class PersonalBest {
-  final Exercise exercise;
+  final String exerciseId;
+  final String exerciseName;
+  final String category;
   final double maxWeightKg;
   final int? reps;
   final int? sets;
   final DateTime achievedAt;
 
   PersonalBest({
-    required this.exercise,
+    required this.exerciseId,
+    required this.exerciseName,
+    required this.category,
     required this.maxWeightKg,
     this.reps,
     this.sets,
@@ -129,103 +19,123 @@ class PersonalBest {
   });
 
   factory PersonalBest.fromJson(Map<String, dynamic> json) {
+    final exercise = json['exercise'] as Map<String, dynamic>;
     return PersonalBest(
-      exercise: Exercise.fromJson(json['exercise']),
-      maxWeightKg: json['maxWeightKg'].toDouble(),
+      exerciseId: exercise['id'],
+      exerciseName: exercise['name'],
+      category: exercise['category'] ?? 'strength',
+      maxWeightKg: (json['maxWeightKg'] as num).toDouble(),
       reps: json['reps'],
       sets: json['sets'],
-      achievedAt: DateTime.parse(json['achievedAt']),
+      achievedAt: DateTime.parse(json['achievedAt']).toLocal(),
+    );
+  }
+
+  bool get isCardio => category == 'cardio';
+}
+
+// Progress Set — individual set within a session
+class ProgressSet {
+  final String id;
+  final int setNumber;
+  final double? weightKg;
+  final int? reps;
+  final int? durationSec;
+  final double? distanceMeters;
+  final int? rpe;
+  final bool isWarmup;
+  final bool isCompleted;
+  final bool isPR;
+
+  ProgressSet({
+    required this.id,
+    required this.setNumber,
+    this.weightKg,
+    this.reps,
+    this.durationSec,
+    this.distanceMeters,
+    this.rpe,
+    required this.isWarmup,
+    required this.isCompleted,
+    required this.isPR,
+  });
+
+  factory ProgressSet.fromJson(Map<String, dynamic> json) {
+    return ProgressSet(
+      id: json['id'],
+      setNumber: json['setNumber'] ?? 0,
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      reps: json['reps'],
+      durationSec: json['durationSec'],
+      distanceMeters: (json['distanceMeters'] as num?)?.toDouble(),
+      rpe: json['rpe'],
+      isWarmup: json['isWarmup'] ?? false,
+      isCompleted: json['isCompleted'] ?? false,
+      isPR: json['isPR'] ?? false,
     );
   }
 }
 
-// Exercise Progress Point
+// Progress Point — one session entry in exercise history
 class ProgressPoint {
   final DateTime date;
-  final int? sets;
-  final int? reps;
-  final double? weightKg;
-  final int? durationSec;
-  final double? volume;
+  final String workoutId;
+  final String? workoutTitle;
+  final List<ProgressSet> sets;
+  final double? maxWeightKg;
+  final double volume;
 
   ProgressPoint({
     required this.date,
-    this.sets,
-    this.reps,
-    this.weightKg,
-    this.durationSec,
-    this.volume,
+    required this.workoutId,
+    this.workoutTitle,
+    required this.sets,
+    this.maxWeightKg,
+    required this.volume,
   });
 
   factory ProgressPoint.fromJson(Map<String, dynamic> json) {
     return ProgressPoint(
-      date: DateTime.parse(json['date']),
-      sets: json['sets'],
-      reps: json['reps'],
-      weightKg: json['weightKg']?.toDouble(),
-      durationSec: json['durationSec'],
-      volume: json['volume']?.toDouble(),
+      date: DateTime.parse(json['date']).toLocal(),
+      workoutId: json['workoutId'],
+      workoutTitle: json['workoutTitle'],
+      sets: (json['sets'] as List? ?? [])
+          .map((s) => ProgressSet.fromJson(s))
+          .toList(),
+      maxWeightKg: (json['maxWeightKg'] as num?)?.toDouble(),
+      volume: (json['volume'] as num?)?.toDouble() ?? 0,
     );
   }
 }
 
-// Exercise Progress (full)
+// Exercise Progress Data — full data for exercise detail screen
 class ExerciseProgressData {
-  final Map<String, dynamic> exercise;
+  final String exerciseId;
+  final String exerciseName;
+  final String category;
+  final List<String> primaryMuscles;
   final List<ProgressPoint> history;
 
-  ExerciseProgressData({required this.exercise, required this.history});
+  ExerciseProgressData({
+    required this.exerciseId,
+    required this.exerciseName,
+    required this.category,
+    required this.primaryMuscles,
+    required this.history,
+  });
 
   factory ExerciseProgressData.fromJson(Map<String, dynamic> json) {
+    final ex = json['exercise'] as Map<String, dynamic>;
     return ExerciseProgressData(
-      exercise: json['exercise'],
-      history: (json['history'] as List)
+      exerciseId: ex['id'],
+      exerciseName: ex['name'],
+      category: ex['category'] ?? 'strength',
+      primaryMuscles: List<String>.from(ex['primaryMuscles'] ?? []),
+      history: (json['history'] as List? ?? [])
           .map((p) => ProgressPoint.fromJson(p))
           .toList(),
     );
   }
-}
 
-// Workout History Item (with duration)
-class WorkoutHistoryItem {
-  final String id;
-  final int userId;
-  final String? title;
-  final String? notes;
-  final DateTime startTime;
-  final DateTime? endTime;
-  final int durationMins;
-  final List<WorkoutExercise> exercises;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  WorkoutHistoryItem({
-    required this.id,
-    required this.userId,
-    this.title,
-    this.notes,
-    required this.startTime,
-    this.endTime,
-    required this.durationMins,
-    required this.exercises,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory WorkoutHistoryItem.fromJson(Map<String, dynamic> json) {
-    return WorkoutHistoryItem(
-      id: json['id'],
-      userId: json['userId'],
-      title: json['title'],
-      notes: json['notes'],
-      startTime: DateTime.parse(json['startTime']),
-      endTime: json['endTime'] != null ? DateTime.parse(json['endTime']) : null,
-      durationMins: json['durationMins'] ?? 0,
-      exercises: (json['exercises'] as List? ?? [])
-          .map((e) => WorkoutExercise.fromJson(e))
-          .toList(),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-    );
-  }
+  bool get isCardio => category == 'cardio';
 }

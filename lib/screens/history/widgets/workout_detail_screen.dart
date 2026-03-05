@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/exercise/history_model.dart';
 import '../../../widgets/app_dialog.dart';
 import '../../../widgets/common.dart';
-
+import '../../../'
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutHistory workout;
 
@@ -89,6 +89,15 @@ class WorkoutDetailScreen extends StatelessWidget {
                       ),
                   ],
                 ),
+                if (workout.notes != null && workout.notes!.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Divider(height: 1, color: kDivider),
+                  const SizedBox(height: 10),
+                  Text(
+                    workout.notes!,
+                    style: const TextStyle(fontSize: 13, color: kTextGrey),
+                  ),
+                ],
               ],
             ),
           ),

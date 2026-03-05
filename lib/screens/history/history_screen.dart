@@ -9,6 +9,9 @@ import 'widgets/monthly_stats_bar.dart';
 import 'widgets/streak_banner.dart';
 import 'widgets/workout_history_card.dart';
 import 'widgets/workout_detail_screen.dart';
+import '../../providers/routine/routine_provider.dart';
+import '../../screens/workout/active_workout_screen_v2.dart';
+import '../../models/exercise/history_model.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -34,7 +37,166 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.dispose();
   }
 
+  // Edit
+  Future<void> _editWorkout(WorkoutHistory workout) async {
+    final titleController = TextEditingController(text: workout.title ?? '');
+    final notesController = TextEditingController(text: workout.notes ?? '');
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 20,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Edit Workout',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: kTextDark,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const SectionLabel('TITLE'),
+            const SizedBox(height: 8),
+            AppTextField(controller: titleController, hint: 'Workout title'),
+            const SizedBox(height: 12),
+            const SectionLabel('NOTES'),
+            const SizedBox(height: 8),
+            AppTextField(
+              controller: notesController,
+              hint: 'Notes',
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            PrimaryButton(
+              text: 'Save',
+              onTap: () async {
+                Navigator.pop(ctx);
+                await context.read<WorkoutProvider>().updateWorkout(
+                  workout.id,
+                  title: titleController.text.trim(),
+                  notes: notesController.text.trim(),
+                );
+                if (mounted) context.read<HistoryProvider>().fetchAll();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Copy
+  void _copyWorkout(WorkoutHistory workout) {
+    final prefilled = workout.exercises
+        .map(
+          (ex) => {
+            'localId':
+                '${ex.exerciseId}_${DateTime.now().millisecondsSinceEpoch}',
+            'exercise': ex.exercise,
+            'supersetGroup': ex.supersetGroup,
+            'sets': ex.sets ?? 3,
+          },
+        )
+        .toList();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ActiveWorkoutScreenV2(
+          workoutTitle: workout.title,
+          prefilledExercises: prefilled,
+        ),
+      ),
+    );
+  }
+
+  // Save as Routine
+  Future<void> _saveAsRoutine(WorkoutHistory workout) async {
+    final nameController = TextEditingController(text: workout.title ?? '');
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 20,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Save as Routine',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: kTextDark,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const SectionLabel('ROUTINE NAME'),
+            const SizedBox(height: 8),
+            AppTextField(controller: nameController, hint: 'e.g. Push Day'),
+            const SizedBox(height: 16),
+            PrimaryButton(
+              text: 'Save Routine',
+              onTap: () async {
+                Navigator.pop(ctx);
+                final routineProvider = context.read<RoutineProvider>();
+                await routineProvider.createRoutine(
+                  name: nameController.text.trim(),
+                );
+                final routine = routineProvider.routines.first;
+                for (final ex in workout.exercises) {
+                  await routineProvider.addExerciseToRoutine(
+                    exerciseId: ex.exerciseId,
+                  );
+                }
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Routine saved!'),
+                      backgroundColor: kGreen,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Delete
   Future<void> _deleteWorkout(String workoutId) async {
+    final confirmed = await AppDialog.show<bool>(
+      context: context,
+      title: 'Delete Workout?',
+      message: 'This workout will be permanently deleted.',
+      actions: [
+        const AppDialogAction(label: 'Cancel', value: false, color: kPrimary),
+        const AppDialogAction(label: 'Delete', value: true, color: kRed),
+      ],
+    );
+    if (confirmed != true) return;
     await context.read<WorkoutProvider>().deleteWorkout(workoutId);
     if (mounted) context.read<HistoryProvider>().fetchAll();
   }
@@ -129,6 +291,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     return WorkoutHistoryCard(
                       workout: workout,
                       onTap: () => _openDetail(context, workout),
+                      onEdit: () => _editWorkout(workout),
+                      onCopy: () => _copyWorkout(workout),
+                      onSaveAsRoutine: () => _saveAsRoutine(workout),
+                      onDelete: () => _deleteWorkout(workout.id),
                     );
                   },
                 ),
@@ -185,6 +351,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: WorkoutHistoryCard(
                   workout: workout,
                   onTap: () => _openDetail(context, workout),
+                  onEdit: () => _editWorkout(workout),
+                  onCopy: () => _copyWorkout(workout),
+                  onSaveAsRoutine: () => _saveAsRoutine(workout),
+                  onDelete: () => _deleteWorkout(workout.id),
                 ),
               ),
             ),

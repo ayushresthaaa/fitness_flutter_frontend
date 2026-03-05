@@ -270,6 +270,10 @@ class WorkoutProvider extends BaseProvider {
     notifyListeners();
   }
 
+  Future<void> updateWorkout(String id, {String? title, String? notes}) async {
+    await execute(() => _service.updateWorkout(id, title: title, notes: notes));
+  }
+
   // Fetch last performance for a single exercise by id
   Future<List<Map<String, dynamic>>?> getLastPerformanceFor(
     String exerciseId,

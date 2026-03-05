@@ -5,82 +5,12 @@ import '../base/base_provider.dart';
 class ProgressProvider extends BaseProvider {
   final ProgressService _service = ProgressService();
 
-  // Stats data
-  OverallStats? _overallStats;
-  Streak? _streak;
-  List<WeeklyDay> _weeklyStats = [];
-  List<MonthlyData> _monthlyStats = [];
-  List<MuscleDistribution> _muscleDistribution = [];
   List<PersonalBest> _personalBests = [];
   ExerciseProgressData? _exerciseProgress;
-  List<WorkoutHistoryItem> _workoutHistory = [];
 
-  // Pagination for history
-  int _currentPage = 1;
-  int _totalPages = 1;
-  int _total = 0;
-  bool _hasMore = true;
-
-  // Getters
-  OverallStats? get overallStats => _overallStats;
-  Streak? get streak => _streak;
-  List<WeeklyDay> get weeklyStats => _weeklyStats;
-  List<MonthlyData> get monthlyStats => _monthlyStats;
-  List<MuscleDistribution> get muscleDistribution => _muscleDistribution;
   List<PersonalBest> get personalBests => _personalBests;
   ExerciseProgressData? get exerciseProgress => _exerciseProgress;
-  List<WorkoutHistoryItem> get workoutHistory => _workoutHistory;
-  int get currentPage => _currentPage;
-  int get totalPages => _totalPages;
-  int get total => _total;
-  bool get hasMore => _hasMore;
 
-  // Fetch overall stats
-  Future<void> fetchOverallStats() async {
-    final result = await execute(() => _service.getOverallStats());
-    if (result != null) {
-      _overallStats = result;
-      notifyListeners();
-    }
-  }
-
-  // Fetch streak
-  Future<void> fetchStreak() async {
-    final result = await execute(() => _service.getStreak());
-    if (result != null) {
-      _streak = result;
-      notifyListeners();
-    }
-  }
-
-  // Fetch weekly stats
-  Future<void> fetchWeeklyStats() async {
-    final result = await execute(() => _service.getWeeklyStats());
-    if (result != null) {
-      _weeklyStats = result;
-      notifyListeners();
-    }
-  }
-
-  // Fetch monthly stats
-  Future<void> fetchMonthlyStats() async {
-    final result = await execute(() => _service.getMonthlyStats());
-    if (result != null) {
-      _monthlyStats = result;
-      notifyListeners();
-    }
-  }
-
-  // Fetch muscle distribution
-  Future<void> fetchMuscleDistribution() async {
-    final result = await execute(() => _service.getMuscleDistribution());
-    if (result != null) {
-      _muscleDistribution = result;
-      notifyListeners();
-    }
-  }
-
-  // Fetch personal bests
   Future<void> fetchPersonalBests() async {
     final result = await execute(() => _service.getPersonalBests());
     if (result != null) {
@@ -89,8 +19,9 @@ class ProgressProvider extends BaseProvider {
     }
   }
 
-  // Fetch exercise progress
   Future<void> fetchExerciseProgress(String exerciseId) async {
+    _exerciseProgress = null;
+    notifyListeners();
     final result = await execute(
       () => _service.getExerciseProgress(exerciseId),
     );
@@ -100,65 +31,118 @@ class ProgressProvider extends BaseProvider {
     }
   }
 
-  // Fetch workout history
-  Future<void> fetchWorkoutHistory({
-    int page = 1,
-    int limit = 10,
-    bool loadMore = false,
-  }) async {
-    final result = await execute(
-      () => _service.getWorkoutHistory(page: page, limit: limit),
-    );
+  //pr calculation
+  // All computed from _exerciseProgress.history
 
-    if (result != null) {
-      final List<WorkoutHistoryItem> newHistory = result['workouts'];
+  // Heaviest weight ever lifted for this exercise
+  double? get heaviestWeight {
+    if (_exerciseProgress == null) return null;
+    final weights = _exerciseProgress!.history
+        .map((p) => p.maxWeightKg)
+        .whereType<double>()
+        .toList();
+    if (weights.isEmpty) return null;
+    return weights.reduce((a, b) => a > b ? a : b);
+  }
 
-      if (loadMore) {
-        _workoutHistory.addAll(newHistory);
-      } else {
-        _workoutHistory = newHistory;
+  // Best 1RM estimate using Epley formula: weight × (1 + reps/30)
+  double? get best1RM {
+    if (_exerciseProgress == null) return null;
+    double? best;
+    for (final point in _exerciseProgress!.history) {
+      for (final set in point.sets) {
+        if (!set.isCompleted || set.isWarmup) continue;
+        if (set.weightKg == null || set.reps == null || set.reps! <= 0)
+          continue;
+        final estimate = set.weightKg! * (1 + set.reps! / 30);
+        if (best == null || estimate > best) best = estimate;
       }
-
-      final pagination = result['pagination'];
-      _currentPage = pagination['page'];
-      _totalPages = pagination['totalPages'];
-      _total = pagination['total'];
-      _hasMore = _currentPage < _totalPages;
-
-      notifyListeners();
     }
+    return best;
   }
 
-  // Load more history
-  Future<void> loadMoreHistory() async {
-    if (!_hasMore || isLoading) return;
-    await fetchWorkoutHistory(page: _currentPage + 1, loadMore: true);
+  // Best single set volume (weight × reps)
+  double? get bestSetVolume {
+    if (_exerciseProgress == null) return null;
+    double? best;
+    for (final point in _exerciseProgress!.history) {
+      for (final set in point.sets) {
+        if (!set.isCompleted || set.isWarmup) continue;
+        if (set.weightKg == null || set.reps == null) continue;
+        final vol = set.weightKg! * set.reps!;
+        if (best == null || vol > best) best = vol;
+      }
+    }
+    return best;
   }
 
-  // Fetch all dashboard data at once
-  Future<void> fetchDashboardData() async {
-    await Future.wait([
-      fetchOverallStats(),
-      fetchStreak(),
-      fetchWeeklyStats(),
-      fetchMuscleDistribution(),
-    ]);
+  // Best session total volume
+  double? get bestSessionVolume {
+    if (_exerciseProgress == null) return null;
+    if (_exerciseProgress!.history.isEmpty) return null;
+    return _exerciseProgress!.history
+        .map((p) => p.volume)
+        .reduce((a, b) => a > b ? a : b);
   }
 
-  // Reset provider
+  // Set records: best weight per rep count (sorted by reps asc)
+  Map<int, double> get setRecords {
+    if (_exerciseProgress == null) return {};
+    final records = <int, double>{};
+    for (final point in _exerciseProgress!.history) {
+      for (final set in point.sets) {
+        if (!set.isCompleted || set.isWarmup) continue;
+        if (set.reps == null || set.weightKg == null) continue;
+        final current = records[set.reps!];
+        if (current == null || set.weightKg! > current) {
+          records[set.reps!] = set.weightKg!;
+        }
+      }
+    }
+    return Map.fromEntries(
+      records.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
+  }
+
+  // Chart data for heaviest weight over time
+  List<Map<String, dynamic>> get weightChartData {
+    if (_exerciseProgress == null) return [];
+    return _exerciseProgress!.history
+        .where((p) => p.maxWeightKg != null)
+        .map((p) => {'date': p.date, 'value': p.maxWeightKg!})
+        .toList();
+  }
+
+  // Chart data for volume over time
+  List<Map<String, dynamic>> get volumeChartData {
+    if (_exerciseProgress == null) return [];
+    return _exerciseProgress!.history
+        .where((p) => p.volume > 0)
+        .map((p) => {'date': p.date, 'value': p.volume})
+        .toList();
+  }
+
+  // Chart data for estimated 1RM over time
+  List<Map<String, dynamic>> get oneRMChartData {
+    if (_exerciseProgress == null) return [];
+    final data = <Map<String, dynamic>>[];
+    for (final point in _exerciseProgress!.history) {
+      double? best;
+      for (final set in point.sets) {
+        if (!set.isCompleted || set.isWarmup) continue;
+        if (set.weightKg == null || set.reps == null || set.reps! <= 0)
+          continue;
+        final estimate = set.weightKg! * (1 + set.reps! / 30);
+        if (best == null || estimate > best) best = estimate;
+      }
+      if (best != null) data.add({'date': point.date, 'value': best});
+    }
+    return data;
+  }
+
   void reset() {
-    _overallStats = null;
-    _streak = null;
-    _weeklyStats = [];
-    _monthlyStats = [];
-    _muscleDistribution = [];
     _personalBests = [];
     _exerciseProgress = null;
-    _workoutHistory = [];
-    _currentPage = 1;
-    _totalPages = 1;
-    _total = 0;
-    _hasMore = true;
     clearError();
     notifyListeners();
   }

@@ -136,4 +136,15 @@ class WorkoutService {
     );
     return response.data['data'];
   }
+
+  // PATCH /api/workouts/:id
+  Future<void> updateWorkout(String id, {String? title, String? notes}) async {
+    await _dio.patch(
+      ApiEndpoints.workoutById(id),
+      data: {
+        if (title != null) 'title': title,
+        if (notes != null) 'notes': notes,
+      },
+    );
+  }
 }
