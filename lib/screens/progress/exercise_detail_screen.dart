@@ -165,8 +165,12 @@ class _SummaryTab extends StatelessWidget {
       children: [
         // Chart
         ExerciseChart(
-          weightData: provider.weightChartData,
-          oneRMData: provider.oneRMChartData,
+          weightData: data.isCardio
+              ? provider.durationChartData
+              : provider.weightChartData,
+          oneRMData: data.isCardio
+              ? provider.distanceChartData
+              : provider.oneRMChartData,
           volumeData: provider.volumeChartData,
           isCardio: data.isCardio,
         ),

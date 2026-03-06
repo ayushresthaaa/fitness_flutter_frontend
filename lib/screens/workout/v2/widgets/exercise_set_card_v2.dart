@@ -3,6 +3,7 @@ import '../../../../models/exercise/exercise_model.dart';
 import '../../../../widgets/common.dart';
 import 'active_set_model.dart';
 import 'set_row_v2.dart';
+import '../../../progress/exercise_detail_screen.dart';
 
 class ExerciseSetCardV2 extends StatelessWidget {
   final Exercise
@@ -45,7 +46,7 @@ class ExerciseSetCardV2 extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           if (lastPerformance.isNotEmpty) _buildLastPerf(),
           _buildColumnLabels(),
           for (int i = 0; i < sets.length; i++)
@@ -62,7 +63,7 @@ class ExerciseSetCardV2 extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return GestureDetector(
       onLongPress: onLongPress,
       child: Padding(
@@ -70,15 +71,29 @@ class ExerciseSetCardV2 extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                exercise.name,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF212121),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ExerciseDetailScreen(
+                        exerciseId: exercise.id,
+                        exerciseName: exercise.name,
+                        exercise: exercise,
+                      ),
+                    ),
+                  );
+                },
+                child: Text(
+                  exercise.name,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: kPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
             GestureDetector(

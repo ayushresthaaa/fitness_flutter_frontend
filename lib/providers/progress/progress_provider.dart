@@ -107,37 +107,97 @@ class ProgressProvider extends BaseProvider {
   // Chart data for heaviest weight over time
   List<Map<String, dynamic>> get weightChartData {
     if (_exerciseProgress == null) return [];
-    return _exerciseProgress!.history
-        .where((p) => p.maxWeightKg != null)
-        .map((p) => {'date': p.date, 'value': p.maxWeightKg!})
+    final seen = <String, double>{};
+    for (final p in _exerciseProgress!.history) {
+      if (p.maxWeightKg == null) continue;
+      final dateKey = p.date.toIso8601String().split('T')[0];
+      final current = seen[dateKey];
+      if (current == null || p.maxWeightKg! > current) {
+        seen[dateKey] = p.maxWeightKg!;
+      }
+    }
+    return seen.entries
+        .map((e) => {'date': DateTime.parse(e.key), 'value': e.value})
         .toList();
   }
 
   // Chart data for volume over time
   List<Map<String, dynamic>> get volumeChartData {
     if (_exerciseProgress == null) return [];
-    return _exerciseProgress!.history
-        .where((p) => p.volume > 0)
-        .map((p) => {'date': p.date, 'value': p.volume})
+    final seen = <String, double>{};
+    for (final p in _exerciseProgress!.history) {
+      if (p.volume <= 0) continue;
+      final dateKey = p.date.toIso8601String().split('T')[0];
+      final current = seen[dateKey];
+      if (current == null || p.volume > current) {
+        seen[dateKey] = p.volume;
+      }
+    }
+    return seen.entries
+        .map((e) => {'date': DateTime.parse(e.key), 'value': e.value})
         .toList();
   }
 
   // Chart data for estimated 1RM over time
   List<Map<String, dynamic>> get oneRMChartData {
     if (_exerciseProgress == null) return [];
-    final data = <Map<String, dynamic>>[];
+    final seen = <String, double>{};
     for (final point in _exerciseProgress!.history) {
-      double? best;
+      final dateKey = point.date.toIso8601String().split('T')[0];
       for (final set in point.sets) {
         if (!set.isCompleted || set.isWarmup) continue;
         if (set.weightKg == null || set.reps == null || set.reps! <= 0)
           continue;
         final estimate = set.weightKg! * (1 + set.reps! / 30);
-        if (best == null || estimate > best) best = estimate;
+        final current = seen[dateKey];
+        if (current == null || estimate > current) {
+          seen[dateKey] = estimate;
+        }
       }
-      if (best != null) data.add({'date': point.date, 'value': best});
     }
-    return data;
+    return seen.entries
+        .map((e) => {'date': DateTime.parse(e.key), 'value': e.value})
+        .toList();
+  }
+
+  // Best duration per day (cardio)
+  List<Map<String, dynamic>> get durationChartData {
+    if (_exerciseProgress == null) return [];
+    final seen = <String, double>{};
+    for (final point in _exerciseProgress!.history) {
+      final dateKey = point.date.toIso8601String().split('T')[0];
+      for (final set in point.sets) {
+        if (!set.isCompleted || set.isWarmup) continue;
+        if (set.durationSec == null) continue;
+        final current = seen[dateKey];
+        if (current == null || set.durationSec!.toDouble() > current) {
+          seen[dateKey] = set.durationSec!.toDouble();
+        }
+      }
+    }
+    return seen.entries
+        .map((e) => {'date': DateTime.parse(e.key), 'value': e.value})
+        .toList();
+  }
+
+  // Best distance per day (cardio)
+  List<Map<String, dynamic>> get distanceChartData {
+    if (_exerciseProgress == null) return [];
+    final seen = <String, double>{};
+    for (final point in _exerciseProgress!.history) {
+      final dateKey = point.date.toIso8601String().split('T')[0];
+      for (final set in point.sets) {
+        if (!set.isCompleted || set.isWarmup) continue;
+        if (set.distanceMeters == null) continue;
+        final current = seen[dateKey];
+        if (current == null || set.distanceMeters! > current) {
+          seen[dateKey] = set.distanceMeters!;
+        }
+      }
+    }
+    return seen.entries
+        .map((e) => {'date': DateTime.parse(e.key), 'value': e.value})
+        .toList();
   }
 
   void reset() {

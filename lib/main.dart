@@ -11,6 +11,8 @@ import './providers/routine/routine_provider.dart';
 import './providers/achievement/achievement_provider.dart';
 import './providers/routine/weekly_program_provider.dart';
 import './providers/exercise/history_provider.dart';
+import './providers/progress/progress_provider.dart';
+import './providers/progress/stats_provider.dart';
 // Import your routes
 import 'routes/app_routes.dart';
 
@@ -56,6 +58,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<HistoryProvider>(
           create: (_) => HistoryProvider(),
         ),
+        ChangeNotifierProvider<ProgressProvider>(
+          create: (_) => ProgressProvider(),
+        ),
+        ChangeNotifierProvider<StatsProvider>(create: (_) => StatsProvider()),
       ],
       child: MaterialApp(
         title: 'Fitness App',

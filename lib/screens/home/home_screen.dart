@@ -1,4 +1,5 @@
 import 'package:fitness_app/screens/history/history_screen.dart';
+import 'package:fitness_app/screens/statistics/stats_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
@@ -268,7 +269,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: _buildQuickActionCard(
                         icon: Icons.bar_chart,
                         label: 'Progress',
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ProgressScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     SizedBox(width: 16),

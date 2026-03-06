@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../models/exercise/history_model.dart';
 import '../../../widgets/app_dialog.dart';
 import '../../../widgets/common.dart';
-import '../../../'
+import '../../progress/exercise_detail_screen.dart';
+
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutHistory workout;
 
@@ -123,6 +124,11 @@ class _ExerciseBlock extends StatelessWidget {
   final WorkoutHistoryExercise exercise;
 
   const _ExerciseBlock({required this.exercise});
+  String _supersetLabel(int group) {
+    const labels = ['A', 'B', 'C', 'D'];
+    if (group <= 0 || group > labels.length) return '';
+    return labels[group - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,12 +143,50 @@ class _ExerciseBlock extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            exercise.exercise?.name ?? 'Exercise',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: kTextDark,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ExerciseDetailScreen(
+                    exerciseId: exercise.exerciseId,
+                    exerciseName: exercise.exercise?.name ?? 'Exercise',
+                    exercise: null,
+                  ),
+                ),
+              );
+            },
+            child: Row(
+              children: [
+                if (exercise.supersetGroup != null)
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: kPrimary,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      _supersetLabel(exercise.supersetGroup!),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: kWhite,
+                      ),
+                    ),
+                  ),
+                Text(
+                  exercise.exercise?.name ?? 'Exercise',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: kPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
 

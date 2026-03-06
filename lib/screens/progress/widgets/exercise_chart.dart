@@ -32,6 +32,15 @@ class _ExerciseChartState extends State<ExerciseChart> {
   }
 
   String _formatValue(double value) {
+    if (widget.isCardio) {
+      if (_selected == ChartType.weight) {
+        return '${(value / 60).toStringAsFixed(1)} min';
+      }
+      if (_selected == ChartType.oneRM) {
+        return '${(value / 1000).toStringAsFixed(2)} km';
+      }
+      return '${value.toStringAsFixed(0)} m';
+    }
     if (_selected == ChartType.volume) {
       if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}k kg';
       return '${value.toStringAsFixed(0)} kg';
@@ -76,7 +85,7 @@ class _ExerciseChartState extends State<ExerciseChart> {
             child: Row(
               children: [
                 _Chip(
-                  label: 'Heaviest',
+                  label: widget.isCardio ? 'Duration' : 'Heaviest',
                   selected: _selected == ChartType.weight,
                   onTap: () => setState(() => _selected = ChartType.weight),
                 ),
@@ -84,6 +93,13 @@ class _ExerciseChartState extends State<ExerciseChart> {
                 if (!widget.isCardio) ...[
                   _Chip(
                     label: 'Est. 1RM',
+                    selected: _selected == ChartType.oneRM,
+                    onTap: () => setState(() => _selected = ChartType.oneRM),
+                  ),
+                  const SizedBox(width: 8),
+                ] else ...[
+                  _Chip(
+                    label: 'Distance',
                     selected: _selected == ChartType.oneRM,
                     onTap: () => setState(() => _selected = ChartType.oneRM),
                   ),
@@ -150,19 +166,13 @@ class _ExerciseChartState extends State<ExerciseChart> {
                       data
                           .map((d) => d['value'] as double)
                           .reduce((a, b) => a < b ? a : b) *
-                      0.9,
+                      0.85,
                   maxY:
                       data
                           .map((d) => d['value'] as double)
                           .reduce((a, b) => a > b ? a : b) *
-                      1.1,
-                  clipData: const FlClipData.all(),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                    getDrawingHorizontalLine: (_) =>
-                        const FlLine(color: Color(0xFFEEEEEE), strokeWidth: 1),
-                  ),
+                      1.15,
+                  gridData: const FlGridData(show: false),
                   borderData: FlBorderData(show: false),
                   titlesData: FlTitlesData(
                     topTitles: const AxisTitles(
@@ -174,8 +184,11 @@ class _ExerciseChartState extends State<ExerciseChart> {
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 44,
-                        getTitlesWidget: (value, _) {
+                        reservedSize: 36,
+                        getTitlesWidget: (value, meta) {
+                          if (value == meta.min || value == meta.max) {
+                            return const SizedBox.shrink();
+                          }
                           return Text(
                             value.toStringAsFixed(0),
                             style: const TextStyle(

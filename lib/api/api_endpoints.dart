@@ -61,6 +61,12 @@ class ApiEndpoints {
   static const String personalBests = '/progress/personal-bests';
   static String exerciseProgress(String id) => '/progress/exercise/$id';
 
+  // Stats endpoints
+  static const String overallStats = '/progress/stats';
+  static const String weeklyStats = '/progress/weekly';
+  static const String monthlyStats = '/progress/monthly';
+  static const String muscleDistribution = '/progress/muscles';
+  static const String streak = '/progress/streak';
   // History endpoints
   static const String history = '/history';
   static const String historySearch = '/history/search';
