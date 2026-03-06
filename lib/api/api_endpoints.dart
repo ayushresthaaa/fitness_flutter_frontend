@@ -28,6 +28,9 @@ class ApiEndpoints {
   static String exerciseByMuscle(String muscleGroup) =>
       '/exercises/muscle/$muscleGroup'; // GET
 
+  //custom exercises
+  static const String customExercises = '/exercises/custom';
+  static String customExerciseById(String id) => '/exercises/custom/$id';
   //workout api endpoints
   static const String workouts = '/workouts'; // POST, GET
 
