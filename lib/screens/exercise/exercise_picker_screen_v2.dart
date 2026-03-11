@@ -7,10 +7,10 @@ import 'widgets/exercise_search_bar_v2.dart';
 import 'widgets/exercise_filter_chips_v2.dart';
 import 'widgets/exercise_list_v2.dart';
 import 'widgets/exercise_tray_v2.dart';
+import 'widgets/custom_exercise_list.dart';
+import '../../providers/exercise/custom_exercise_provider.dart';
+import 'custom_exercise/create_custom_exercise_screen.dart';
 
-// Exercise picker screen
-// Used when adding exercises to a workout or routine
-// Pops itself and returns selected exercises via onExercisesSelected
 class ExercisePickerScreenV2 extends StatefulWidget {
   final Function(List<Exercise>) onExercisesSelected;
 
@@ -20,10 +20,11 @@ class ExercisePickerScreenV2 extends StatefulWidget {
   State<ExercisePickerScreenV2> createState() => _ExercisePickerScreenV2State();
 }
 
-class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2> {
+class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2>
+    with SingleTickerProviderStateMixin {
   final List<Exercise> _selected = [];
   final ScrollController _scrollController = ScrollController();
-
+  late final TabController _tabController;
   String? _search;
   String? _selectedMuscle;
   String? _selectedLevel;
@@ -32,10 +33,11 @@ class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
+    _tabController = TabController(length: 2, vsync: this);
     // Load exercises and muscle list when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final p = context.read<ExerciseProvider>();
+      context.read<CustomExerciseProvider>().fetchCustomExercises();
       p.fetchExercises();
       p.fetchMuscles();
     });
@@ -44,6 +46,7 @@ class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -111,42 +114,83 @@ class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2> {
       body: SafeArea(
         child: Column(
           children: [
-            // Search bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: ExerciseSearchBarV2(onChanged: _onSearchChanged),
+            TabBar(
+              controller: _tabController,
+              labelColor: kPrimary,
+              unselectedLabelColor: kTextGrey,
+              indicatorColor: kPrimary,
+              tabs: const [
+                Tab(text: 'All Exercises'),
+                Tab(text: 'My Exercises'),
+              ],
             ),
-
-            const SizedBox(height: 10),
-            // Muscle group filter chips
-            ExerciseFilterChipsV2(
-              options: muscles,
-              selected: _selectedMuscle,
-              onSelected: _onMuscleChanged,
-            ),
-
-            const SizedBox(
-              height: 10,
-            ), //this is a bit hacky but adds spacing between the two chip rows
-            // Level filter chips
-            ExerciseFilterChipsV2(
-              options: const ['beginner', 'intermediate', 'expert'],
-              selected: _selectedLevel,
-              onSelected: _onLevelChanged,
-            ),
-
-            const SizedBox(height: 4),
-
-            // Exercise list takes remaining space
             Expanded(
-              child: ExerciseListV2(
-                selected: _selected,
-                scrollController: _scrollController,
-                onTap: _toggleExercise,
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // All Exercises tab — same as before
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                        child: ExerciseSearchBarV2(onChanged: _onSearchChanged),
+                      ),
+                      const SizedBox(height: 10),
+                      ExerciseFilterChipsV2(
+                        options: muscles,
+                        selected: _selectedMuscle,
+                        onSelected: _onMuscleChanged,
+                      ),
+                      const SizedBox(height: 10),
+                      ExerciseFilterChipsV2(
+                        options: const ['beginner', 'intermediate', 'expert'],
+                        selected: _selectedLevel,
+                        onSelected: _onLevelChanged,
+                      ),
+                      const SizedBox(height: 4),
+                      Expanded(
+                        child: ExerciseListV2(
+                          selected: _selected,
+                          scrollController: _scrollController,
+                          onTap: _toggleExercise,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // My Exercises tab
+                  CustomExerciseList(
+                    selected: _selected,
+                    onTap: _toggleExercise,
+                    onCreateTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CreateCustomExerciseScreen(),
+                        ),
+                      );
+                      context
+                          .read<CustomExerciseProvider>()
+                          .fetchCustomExercises();
+                    },
+                    onEditTap: (exercise) async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CreateCustomExerciseScreen(exercise: exercise),
+                        ),
+                      );
+                      context
+                          .read<CustomExerciseProvider>()
+                          .fetchCustomExercises();
+                    },
+                  ),
+                ],
               ),
             ),
 
-            // Bottom tray only shows when something is selected
+            // Tray shows in both tabs when something is selected
             if (_selected.isNotEmpty)
               ExerciseTrayV2(
                 selected: _selected,

@@ -1,8 +1,8 @@
 class ApiEndpoints {
-  static const String ip = '192.168.1.76';
+  static const String ip = '192.168.87.96';
   // Base
   // static const String baseUrl = 'http://192.168.1.76:4000/api';
-  static const String baseUrl = 'http://192.168.1.76:4000/api';
+  static const String baseUrl = 'http://192.168.87.96:4000/api';
 
   //authentication endpoints
   static const String login = '/auth/login';
@@ -54,6 +54,9 @@ class ApiEndpoints {
 
   static String routineExerciseById(String routineId, String exerciseId) =>
       '/routines/$routineId/exercises/$exerciseId'; // PUT, DELETE),
+
+  static String sendRoutineForReview(String id) =>
+      '/routines/$id/send-for-review'; // POST
 
   // Weekly Program endpoints
   static const String weeklyProgram = '/weekly-program';

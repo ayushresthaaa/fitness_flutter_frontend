@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/routine/routine_provider.dart';
 import '../../widgets/common.dart';
-import 'routine_detail_screen.dart';
+import 'routine_detail_screenV2.dart';
 
 // Simple screen to create a new routine
 // Just name and description, exercises added in detail screen after

@@ -4,14 +4,13 @@ import '../../../widgets/common.dart';
 import 'routine_exercise_card.dart';
 
 // Wraps two paired exercises in a superset group
-// Same blue left border style as SupersetCardV2
 class RoutineSupsetCard extends StatelessWidget {
   final String label;
   final RoutineExercise exerciseA;
   final RoutineExercise exerciseB;
   final VoidCallback onRemoveA;
   final VoidCallback onRemoveB;
-  final VoidCallback onUnpair;
+  final VoidCallback? onUnpair;
 
   const RoutineSupsetCard({
     super.key,
@@ -20,7 +19,7 @@ class RoutineSupsetCard extends StatelessWidget {
     required this.exerciseB,
     required this.onRemoveA,
     required this.onRemoveB,
-    required this.onUnpair,
+    this.onUnpair,
   });
 
   @override
@@ -34,11 +33,12 @@ class RoutineSupsetCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Superset label + unpair
+          // Superset label, unpair button (hidden in readonly mode)
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
             child: Row(
               children: [
+                // Superset label chip
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -57,18 +57,22 @@ class RoutineSupsetCard extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 const Spacer(),
-                GestureDetector(
-                  onTap: onUnpair,
-                  child: const Text(
-                    'Unpair',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: kTextGrey,
-                      fontWeight: FontWeight.w500,
+
+                
+                if (onUnpair != null)
+                  GestureDetector(
+                    onTap: onUnpair,
+                    child: const Text(
+                      'Unpair',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: kTextGrey,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -79,7 +83,10 @@ class RoutineSupsetCard extends StatelessWidget {
           ),
 
           // Exercise A
-          RoutineExerciseCard(routineExercise: exerciseA, onRemove: onRemoveA),
+          RoutineExerciseCard(
+            routineExercise: exerciseA,
+            onRemove: onRemoveA,
+          ),
 
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
@@ -87,7 +94,10 @@ class RoutineSupsetCard extends StatelessWidget {
           ),
 
           // Exercise B
-          RoutineExerciseCard(routineExercise: exerciseB, onRemove: onRemoveB),
+          RoutineExerciseCard(
+            routineExercise: exerciseB,
+            onRemove: onRemoveB,
+          ),
         ],
       ),
     );

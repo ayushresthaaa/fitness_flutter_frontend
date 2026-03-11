@@ -1,4 +1,6 @@
+import 'package:fitness_app/screens/achievements/achievement_screen.dart';
 import 'package:fitness_app/screens/history/history_screen.dart';
+import 'package:fitness_app/screens/routine/routine_nav_screen.dart';
 import 'package:fitness_app/screens/statistics/stats_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +9,7 @@ import '../../providers/auth/auth_provider.dart';
 // import '../workout/active_workout_screen.dart';
 // import '../../providers/exercise/workout_provider.dart';
 import '../../screens/exercise/exercise_picker_screen_v2.dart';
-// import '../../screens/home/start_workout_screen.dart';
+import '../../screens/home/start_workout_screen.dart';
 import '../../screens/workout/active_workout_screen_v2.dart';
 import '../../screens/routine/routine_list_screen.dart';
 import '../../screens/weekly_program/weekly_program_screen.dart';
@@ -103,10 +105,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.grey[100],
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          Icons.emoji_events,
-                          color: Colors.grey[800],
-                          size: 28,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.emoji_events,
+                            color: Colors.grey[800],
+                            size: 28,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AchievementScreen(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -245,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const HistoryScreen(),
+                            builder: (_) => const StartWorkoutScreen(),
                           ),
                         ),
                       ),

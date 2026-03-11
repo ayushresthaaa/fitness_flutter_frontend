@@ -154,7 +154,6 @@ class _CreateCustomExerciseScreenState
 
     final provider = context.read<CustomExerciseProvider>();
 
-    // If editing, call update. If creating, call create.
     if (widget.exercise != null) {
       final result = await provider.updateCustomExercise(
         id: widget.exercise!.id,

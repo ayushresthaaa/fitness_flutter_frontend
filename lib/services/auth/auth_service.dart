@@ -7,7 +7,7 @@ import '../../models/user/user.dart';
 
 class AuthService {
   final String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.76:4000/api';
+      dotenv.env['API_BASE_URL'] ?? 'http://192.168.87.96:4000/api';
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     serverClientId:
@@ -63,7 +63,6 @@ class AuthService {
     }
   }
 
-  // Google Sign-In login
   // Google Sign-In login
   Future<Map<String, dynamic>> loginWithGoogle() async {
     try {

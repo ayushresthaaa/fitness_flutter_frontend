@@ -62,6 +62,15 @@ class WorkoutExerciseCard extends StatelessWidget {
                           color: Color(0xFF9E9E9E),
                         ),
                       ),
+                      if (workoutExercise.sets != null ||
+                          workoutExercise.reps != null)
+                        Text(
+                          '${workoutExercise.sets ?? '-'} sets · ${workoutExercise.reps ?? '-'} reps',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF1E88E5),
+                          ),
+                        ),
                     ],
                   ),
                 ),

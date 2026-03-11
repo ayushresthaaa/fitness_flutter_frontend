@@ -29,7 +29,7 @@ class _OnboardingGuardState extends State<OnboardingGuard> {
         await userProvider.fetchUserProfile();
       }
     } catch (e) {
-      print('Profile fetch failed: $e');
+      // print('Profile fetch failed: $e');
     } finally {
       if (mounted) {
         setState(() => _isChecking = false);

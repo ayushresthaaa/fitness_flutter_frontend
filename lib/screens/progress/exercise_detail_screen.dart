@@ -56,7 +56,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
           body: SafeArea(
             child: Column(
               children: [
-                // Muscle chip + tab bar
                 Container(
                   color: kWhite,
                   child: Column(

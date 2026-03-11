@@ -133,4 +133,9 @@ class RoutineService {
     final response = await _dio.post(ApiEndpoints.startRoutine(routineId));
     return Workout.fromJson(response.data['data']);
   }
+
+  // POST /api/routines/:id/send-for-review
+  Future<void> sendRoutineForReview(String routineId) async {
+    await _dio.post(ApiEndpoints.sendRoutineForReview(routineId));
+  }
 }

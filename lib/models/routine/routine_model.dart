@@ -10,6 +10,12 @@ class Routine {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // Trainer fields - added for trainer-client feature
+  final bool
+  createdByTrainer; // true if trainer created this routine for the client
+  final String? trainerNotes; // routine-level note from trainer
+  final String? reviewStatus; // null | 'pending' | 'reviewed'
+
   Routine({
     required this.id,
     required this.userId,
@@ -19,6 +25,11 @@ class Routine {
     required this.exercises,
     required this.createdAt,
     required this.updatedAt,
+
+    // Trainer fields - default values so existing code doesn't break
+    this.createdByTrainer = false,
+    this.trainerNotes,
+    this.reviewStatus,
   });
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -33,6 +44,11 @@ class Routine {
           .toList(),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+
+      // Trainer fields - safe defaults if backend doesn't return them
+      createdByTrainer: json['createdByTrainer'] ?? false,
+      trainerNotes: json['trainerNotes'],
+      reviewStatus: json['reviewStatus'],
     );
   }
 
@@ -46,6 +62,11 @@ class Routine {
       'exercises': exercises.map((e) => e.toJson()).toList(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+
+      // Trainer fields
+      'createdByTrainer': createdByTrainer,
+      'trainerNotes': trainerNotes,
+      'reviewStatus': reviewStatus,
     };
   }
 }
@@ -64,6 +85,7 @@ class RoutineExercise {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int? supersetGroup;
+
   RoutineExercise({
     required this.id,
     required this.routineId,

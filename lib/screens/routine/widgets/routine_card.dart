@@ -3,7 +3,6 @@ import '../../../models/routine/routine_model.dart';
 import '../../../widgets/common.dart';
 
 // Card shown in routine list screen
-// Tap to open detail, start button to begin workout immediately
 class RoutineCard extends StatelessWidget {
   final Routine routine;
   final VoidCallback onTap;
@@ -66,6 +65,60 @@ class RoutineCard extends StatelessWidget {
               ],
             ),
 
+            // Badges - From Trainer and Pending Review only
+            if (routine.createdByTrainer == true ||
+                routine.reviewStatus == 'pending')
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    // From Trainer badge - blue
+                    if (routine.createdByTrainer == true)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: kPrimaryLight,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'From Trainer',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: kPrimary,
+                          ),
+                        ),
+                      ),
+
+                    // Pending Review badge - orange
+                    if (routine.reviewStatus == 'pending')
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF3E0),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Pending Review',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFFF57C00),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
             // Description
             if (routine.description != null && routine.description!.isNotEmpty)
               Padding(
@@ -73,6 +126,23 @@ class RoutineCard extends StatelessWidget {
                 child: Text(
                   routine.description!,
                   style: const TextStyle(fontSize: 12, color: kTextGrey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+            // Trainer notes - only shown if trainer left a note
+            if (routine.trainerNotes != null &&
+                routine.trainerNotes!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Trainer: ${routine.trainerNotes!}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: kPrimary,
+                    fontStyle: FontStyle.italic,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

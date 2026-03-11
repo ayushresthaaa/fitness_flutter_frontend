@@ -3,14 +3,10 @@ import 'package:provider/provider.dart';
 import '../../providers/routine/routine_provider.dart';
 import '../../widgets/common.dart';
 import 'create_routine_screen.dart';
-import 'routine_detail_screen.dart';
+import 'routine_detail_screenV2.dart';
 import 'widgets/routine_card.dart';
 import '../../screens/workout/active_workout_screen_v2.dart';
 
-// Shows all user routines
-// Tap card to open detail screen
-// Start button to begin workout immediately from routine
-// Plus button to create new routine
 class RoutineListScreen extends StatefulWidget {
   const RoutineListScreen({super.key});
 

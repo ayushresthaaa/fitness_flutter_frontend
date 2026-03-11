@@ -1,0 +1,163 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/routine/routine_provider.dart';
+import '../../widgets/common.dart';
+import 'create_routine_screen.dart';
+import 'filtered_routine_screen.dart';
+
+// Entry point for the Routines section
+class RoutineNavScreen extends StatefulWidget {
+  const RoutineNavScreen({super.key});
+
+  @override
+  State<RoutineNavScreen> createState() => _RoutineNavScreenState();
+}
+
+class _RoutineNavScreenState extends State<RoutineNavScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch all routines once here so filtered screens don't need to re-fetch
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RoutineProvider>().fetchRoutines();
+    });
+  }
+
+  // Navigate to create routine screen
+  // Refresh routines when coming back in case a new one was created
+  void _createRoutine() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CreateRoutineScreen()),
+    );
+
+    if (mounted) {
+      context.read<RoutineProvider>().fetchRoutines();
+    }
+  }
+
+  // Navigate to filtered list screen with the given filter
+  void _openFilter(String filter) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => FilteredRoutineScreen(filter: filter)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kBackground,
+      appBar: AppTopBar(
+        title: 'Routines',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: _createRoutine,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: kPrimary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.add, color: kWhite, size: 20),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // My Routines button
+              _NavButton(
+                title: 'My Routines',
+                subtitle: 'Routines you created yourself',
+                onTap: () => _openFilter('mine'),
+              ),
+
+              const SizedBox(height: 12),
+
+              // From Trainer button
+              _NavButton(
+                title: 'From Trainer',
+                subtitle: 'Routines prescribed by your trainer',
+                onTap: () => _openFilter('trainer'),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Reviewed by Trainer button
+              _NavButton(
+                title: 'Reviewed by Trainer',
+                subtitle: 'Your routines that your trainer has reviewed',
+                onTap: () => _openFilter('reviewed'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _NavButton({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: kWhite,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: kPrimaryLight),
+        ),
+        child: Row(
+          children: [
+            // Title and subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: kTextDark,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12, color: kTextGrey),
+                  ),
+                ],
+              ),
+            ),
+
+            // Arrow
+            const Icon(Icons.chevron_right_rounded, color: kTextGrey, size: 22),
+          ],
+        ),
+      ),
+    );
+  }
+}

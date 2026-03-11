@@ -178,28 +178,28 @@ class HowToTab extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 26,
-                          height: 26,
-                          decoration: const BoxDecoration(
-                            color: kPrimary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${i + 1}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: kWhite,
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Container(
+                        //   width: 26,
+                        //   height: 26,
+                        //   decoration: const BoxDecoration(
+                        //     color: kPrimary,
+                        //     shape: BoxShape.circle,
+                        //   ),
+                        //   child: Center(
+                        //     child: Text(
+                        //       '${i + 1}',
+                        //       style: const TextStyle(
+                        //         fontSize: 12,
+                        //         fontWeight: FontWeight.w700,
+                        //         color: kWhite,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            exercise.instructions[i],
+                            '${i + 1}. ${exercise.instructions[i]}',
                             style: const TextStyle(
                               fontSize: 14,
                               color: kTextDark,

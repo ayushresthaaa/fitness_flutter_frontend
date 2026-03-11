@@ -6,7 +6,7 @@ import '../../../widgets/common.dart';
 // Long press to pair as superset
 class RoutineExerciseCard extends StatelessWidget {
   final RoutineExercise routineExercise;
-  final VoidCallback onRemove;
+  final VoidCallback? onRemove;
   final VoidCallback? onLongPress;
 
   const RoutineExerciseCard({
@@ -42,16 +42,7 @@ class RoutineExerciseCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         child: Row(
           children: [
-            // Category dot
-            Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.only(right: 10, top: 2),
-              decoration: BoxDecoration(
-                color: isCardio ? const Color(0xFFF57C00) : kPrimary,
-                shape: BoxShape.circle,
-              ),
-            ),
+            
 
             // Name + meta
             Expanded(

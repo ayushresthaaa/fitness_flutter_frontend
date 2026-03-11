@@ -54,7 +54,7 @@ class ExerciseHistoryList extends StatelessWidget {
       return const EmptyState(
         icon: Icons.history_rounded,
         title: 'No history yet',
-        subtitle: 'Complete a workout to see your history here',
+        subtitle: '',
       );
     }
 
@@ -150,7 +150,7 @@ class ExerciseHistoryList extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: kTextDark,
+                                color: kTextGrey,
                               ),
                             ),
                           ),

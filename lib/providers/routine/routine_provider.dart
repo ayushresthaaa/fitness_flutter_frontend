@@ -213,6 +213,15 @@ class RoutineProvider extends BaseProvider {
     return result;
   }
 
+  Future<void> sendRoutineForReview(String routineId) async {
+    await execute(() => _service.sendRoutineForReview(routineId));
+
+    if (!hasError) {
+      // Refresh the routine so reviewStatus updates to 'pending' on screen
+      await fetchRoutineById(routineId);
+    }
+  }
+
   // Clear selected routine
   void clearSelectedRoutine() {
     _selectedRoutine = null;

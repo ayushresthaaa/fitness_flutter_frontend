@@ -12,7 +12,6 @@ class AuthGuard extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
 
-    // Not authenticated? Redirect immediately
     if (!authProvider.isAuthenticated) {
       Future.microtask(() {
         Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);

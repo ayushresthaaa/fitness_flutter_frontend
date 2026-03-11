@@ -3,9 +3,6 @@ import '../../models/exercise/exercise_model.dart';
 import '../../widgets/common.dart';
 import '../../api/api_endpoints.dart';
 
-// Exercise detail screen
-// Shows full info images, muscles, instructions
-// Opened from workout screen or browse exercises screen
 class ExerciseDetailScreen extends StatelessWidget {
   final Exercise exercise;
 
@@ -26,7 +23,7 @@ class ExerciseDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // First image — hero
+   
             // Swipeable image gallery
             if (exercise.images.isNotEmpty)
               SizedBox(
