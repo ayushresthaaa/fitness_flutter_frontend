@@ -8,6 +8,8 @@ import '../../providers/auth/auth_provider.dart';
 // import '../exercise/exericse_picker_screen.dart';
 // import '../workout/active_workout_screen.dart';
 // import '../../providers/exercise/workout_provider.dart';
+import '../../providers/notification/notification_provider.dart';
+import '../../screens/notification/notification_screen.dart';
 import '../../screens/exercise/exercise_picker_screen_v2.dart';
 import '../../screens/home/start_workout_screen.dart';
 import '../../screens/workout/active_workout_screen_v2.dart';
@@ -27,6 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onBottomNavTap(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().fetchUnreadCount();
     });
   }
 
@@ -119,6 +129,53 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           },
+                        ),
+                      ),
+
+                      SizedBox(width: 8),
+
+                      // Bell icon with unread badge
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            shape: BoxShape.circle,
+                          ),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Icon(
+                                Icons.notifications_outlined,
+                                color: Colors.grey[800],
+                                size: 28,
+                              ),
+                              if (context
+                                      .watch<NotificationProvider>()
+                                      .unreadCount >
+                                  0)
+                                Positioned(
+                                  right: -2,
+                                  top: -2,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

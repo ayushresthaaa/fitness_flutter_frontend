@@ -14,6 +14,7 @@ import './providers/exercise/history_provider.dart';
 import './providers/progress/progress_provider.dart';
 import './providers/progress/stats_provider.dart';
 import './providers/exercise/custom_exercise_provider.dart';
+import './providers/notification/notification_provider.dart';
 // Import your routes
 import 'routes/app_routes.dart';
 
@@ -66,7 +67,20 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<CustomExerciseProvider>(
           create: (_) => CustomExerciseProvider(),
         ),
+        ChangeNotifierProvider<NotificationProvider>(
+          create: (_) => NotificationProvider(),
+        ),
       ],
+      builder: (context, child) {
+        // Wire socket → notification provider
+        // When a socket notification arrives, push it into NotificationProvider
+        context.read<AuthProvider>().onNewNotification = (notification) {
+          context.read<NotificationProvider>().addSocketNotification(
+            notification,
+          );
+        };
+        return child!;
+      },
       child: MaterialApp(
         title: 'Fitness App',
         initialRoute: LoginScreen.routeName,

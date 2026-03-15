@@ -2,7 +2,7 @@ class ApiEndpoints {
   static const String ip = '192.168.87.96';
   // Base
   // static const String baseUrl = 'http://192.168.1.76:4000/api';
-  static const String baseUrl = 'http://192.168.87.96:4000/api';
+  static const String baseUrl = 'http://192.168.1.76:4000/api';
 
   //authentication endpoints
   static const String login = '/auth/login';
@@ -83,4 +83,14 @@ class ApiEndpoints {
   static const String achievements = '/achievements'; // GET
   static const String checkAchievements = '/achievements/check'; // POST
   static const String addAchievement = '/achievements'; // POST (admin)
+
+  //notification endpoints
+  static const String notifications = '/notifications'; // GET
+  static const String notificationsUnreadCount =
+      '/notifications/unread-count'; // GET
+  static const String notificationsMarkAllRead =
+      '/notifications/read-all'; // PATCH
+  static String notificationMarkRead(String id) =>
+      '/notifications/$id/read'; // PATCH
+  static String notificationDelete(String id) => '/notifications/$id'; // DELETE
 }
