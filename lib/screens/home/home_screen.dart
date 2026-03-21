@@ -15,6 +15,7 @@ import '../../screens/home/start_workout_screen.dart';
 import '../../screens/workout/active_workout_screen_v2.dart';
 import '../../screens/routine/routine_list_screen.dart';
 import '../../screens/weekly_program/weekly_program_screen.dart';
+import '../../screens/ecommerce/product_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -27,6 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   void _onBottomNavTap(int index) {
+    // Shop tab — navigate directly instead of switching body
+    if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ProductListScreen()),
+      );
+      return;
+    }
+
     setState(() {
       _selectedIndex = index;
     });

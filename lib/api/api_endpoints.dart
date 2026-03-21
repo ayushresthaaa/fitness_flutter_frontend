@@ -93,4 +93,17 @@ class ApiEndpoints {
   static String notificationMarkRead(String id) =>
       '/notifications/$id/read'; // PATCH
   static String notificationDelete(String id) => '/notifications/$id'; // DELETE
+
+  // Ecommerce endpoints
+  static const String products = '/products';
+  static const String featuredProducts = '/products/featured';
+  static String productById(String id) => '/products/$id';
+
+  static const String categories = '/categories';
+
+  static const String cart = '/cart';
+  static String cartItem(String itemId) => '/cart/$itemId';
+
+  static const String orders = '/orders';
+  static String orderById(String id) => '/orders/$id';
 }
