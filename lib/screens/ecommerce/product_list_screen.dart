@@ -5,6 +5,7 @@ import '../../widgets/common.dart';
 import 'product_detail_screen.dart';
 import 'widget/product_card.dart';
 import 'widget/category_filter_chips.dart';
+import '../../screens/ecommerce/orders_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   static const routeName = '/shop';
@@ -41,7 +42,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     return Scaffold(
       backgroundColor: kBackground,
-      appBar: AppTopBar(title: 'Shop'),
+      appBar: AppTopBar(
+        title: 'Shop',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const OrdersScreen()),
+                );
+              },
+              child: const Icon(Icons.receipt_long_outlined, color: kTextDark),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           const SizedBox(height: 12),

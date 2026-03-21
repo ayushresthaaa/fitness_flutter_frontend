@@ -40,18 +40,21 @@ class OrderProvider extends BaseProvider {
     return result;
   }
 
-  // Fetch order history for a specific page
   Future<void> fetchOrders({int page = 1}) async {
     final result = await execute(
       () => _service.getOrders(page: page, limit: 10),
     );
 
     if (result != null) {
+      print('fetchOrders result: ${result['orders'].length} orders');
+      print('fetchOrders pagination: ${result['pagination']}');
       _orders = result['orders'];
       final pagination = result['pagination'];
       _currentPage = pagination['page'];
       _totalPages = pagination['totalPages'];
       notifyListeners();
+    } else {
+      print('fetchOrders result is null - hasError: $hasError - error: $error');
     }
   }
 

@@ -24,6 +24,7 @@ dependencies:
   fl_chart: ^0.69.0
   image_picker: ^1.2.1
   socket_io_client: ^2.0.3
+  khalti_checkout_flutter: ^1.0.0-dev.9
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,3 +1,5 @@
+import '../../api/api_endpoints.dart';
+
 class ProductCategory {
   final String id;
   final String name;
@@ -43,18 +45,21 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final rawImageUrls = json['imageUrls'] as List? ?? [];
+    final imageUrls = rawImageUrls
+        .map((url) => (url as String).replaceAll('localhost', ApiEndpoints.ip))
+        .toList();
+
     return Product(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'],
-      price: (json['price'] as num).toDouble(),
+      price: (json['price'] as num? ?? 0).toDouble(),
       stock: json['stock'] ?? 0,
-      imageUrls: (json['imageUrls'] as List? ?? [])
-          .map((url) => url.toString())
-          .toList(),
+      imageUrls: imageUrls,
       isActive: json['isActive'] ?? true,
       isFeatured: json['isFeatured'] ?? false,
-      categoryId: json['categoryId'] ?? '', // handle null
+      categoryId: json['categoryId'] ?? '',
       category: json['category'] != null
           ? ProductCategory.fromJson(json['category'])
           : null,
