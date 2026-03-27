@@ -1,71 +1,76 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:dio/dio.dart';
 import '../../models/user/user.dart';
+import '../../api/api_client.dart';
+import '../../api/api_endpoints.dart';
 
 class UserService {
-  final String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.76:4000/api';
+  final Dio _dio = ApiClient().dio;
 
-  // Complete onboarding using UserProfile object
+  // Complete onboarding
   Future<UserProfile> completeOnboarding({
-    required String token,
     required UserProfile profile,
   }) async {
-    final url = Uri.parse('$baseUrl/users/me/onboarding');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(profile.toJson()), // send full profile as JSON
+    final response = await _dio.post(
+      ApiEndpoints.onboarding,
+      data: profile.toJson(),
     );
-
-    late final Map<String, dynamic> body;
-    try {
-      body = jsonDecode(response.body);
-    } catch (_) {
-      throw Exception('Invalid server response');
-    }
-
-    if (response.statusCode >= 200 &&
-        response.statusCode < 300 &&
-        body['success'] == true) {
-      return UserProfile.fromJson(body['data']);
-    } else {
-      throw Exception(body['message'] ?? 'Onboarding failed');
-    }
+    return UserProfile.fromJson(response.data['data']);
   }
 
   // Get current user profile
-  Future<User> getUserProfile(String token) async {
-    final url = Uri.parse('$baseUrl/auth/me');
+  Future<User> getUserProfile() async {
+    final response = await _dio.post(ApiEndpoints.me);
+    return User.fromJson(response.data['data']);
+  }
 
-    final response = await http.post(
-      //changed to post to match backend route
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+  // PATCH /users/me — update name and/or email
+  Future<User> updateAccount({String? name, String? email}) async {
+    final response = await _dio.patch(
+      ApiEndpoints.updateAccount,
+      data: {
+        if (name != null) 'name': name,
+        if (email != null) 'email': email,
       },
     );
+    return User.fromJson(response.data['data']);
+  }
 
-    late final Map<String, dynamic> body;
-    try {
-      body = jsonDecode(response.body);
-    } catch (_) {
-      throw Exception('Invalid server response');
-    }
+  // PUT /users/me/profile — update fitness profile
+  Future<UserProfile> updateFitnessProfile({
+    double? heightCm,
+    double? currentWeightKg,
+    String? fitnessGoal,
+    String? activityLevel,
+    String? equipmentAccess,
+    String? gender,
+    DateTime? dateOfBirth,
+  }) async {
+    final response = await _dio.put(
+      ApiEndpoints.updateProfile,
+      data: {
+        if (heightCm != null) 'heightCm': heightCm,
+        if (currentWeightKg != null) 'currentWeightKg': currentWeightKg,
+        if (fitnessGoal != null) 'fitnessGoal': fitnessGoal,
+        if (activityLevel != null) 'activityLevel': activityLevel,
+        if (equipmentAccess != null) 'equipmentAccess': equipmentAccess,
+        if (gender != null) 'gender': gender,
+        if (dateOfBirth != null) 'dateOfBirth': dateOfBirth.toIso8601String(),
+      },
+    );
+    return UserProfile.fromJson(response.data['data']);
+  }
 
-    if (response.statusCode >= 200 &&
-        response.statusCode < 300 &&
-        body['success'] == true) {
-      return User.fromJson(body['data']);
-    } else {
-      throw Exception(body['message'] ?? 'Failed to fetch user profile');
-    }
+  // PATCH /users/me/password — change password
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _dio.patch(
+      ApiEndpoints.changePassword,
+      data: {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      },
+    );
   }
 }

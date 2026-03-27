@@ -9,6 +9,7 @@ class Routine {
   final List<RoutineExercise> exercises;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool isAIGenerated;
 
   // Trainer fields - added for trainer-client feature
   final bool
@@ -30,6 +31,7 @@ class Routine {
     this.createdByTrainer = false,
     this.trainerNotes,
     this.reviewStatus,
+    this.isAIGenerated = false,
   });
 
   factory Routine.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class Routine {
       createdByTrainer: json['createdByTrainer'] ?? false,
       trainerNotes: json['trainerNotes'],
       reviewStatus: json['reviewStatus'],
+      isAIGenerated: json['isAIGenerated'] ?? false,
     );
   }
 
@@ -67,6 +70,7 @@ class Routine {
       'createdByTrainer': createdByTrainer,
       'trainerNotes': trainerNotes,
       'reviewStatus': reviewStatus,
+      'isAIGenerated': isAIGenerated,
     };
   }
 }

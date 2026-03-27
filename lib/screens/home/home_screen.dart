@@ -16,6 +16,10 @@ import '../../screens/workout/active_workout_screen_v2.dart';
 import '../../screens/routine/routine_list_screen.dart';
 import '../../screens/weekly_program/weekly_program_screen.dart';
 import '../../screens/ecommerce/product_list_screen.dart';
+import '../../providers/user/user.provider.dart';
+import '../../providers/routine/weekly_program_provider.dart';
+import '../../widgets/common.dart';
+import '../../screens/user_profile/user_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -26,6 +30,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  String _goalLabel(String? goal) {
+    switch (goal) {
+      case 'lose_fat':
+        return 'Fat Loss';
+      case 'gain_muscle':
+        return 'Muscle Gain';
+      case 'maintain':
+        return 'Maintain';
+      default:
+        return 'Not set';
+    }
+  }
 
   void _onBottomNavTap(int index) {
     // Shop tab — navigate directly instead of switching body
@@ -36,7 +52,13 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-
+    if (index == 4) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
+      return;
+    }
     setState(() {
       _selectedIndex = index;
     });
@@ -47,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NotificationProvider>().fetchUnreadCount();
+      context.read<WeeklyProgramProvider>().fetchToday();
     });
   }
 
@@ -63,253 +86,237 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Header with Streak
                 Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.local_fire_department,
-                        color: Colors.orange[600],
-                        size: 36,
+                      // Avatar with initial
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE3F2FD),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            (authProvider.user?.name ?? 'U')[0].toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E88E5),
+                            ),
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '7 DAYS, Aayush Shrestha',
-                              style: TextStyle(
+                              '${authProvider.user?.name?.split(' ').first ?? ''} ',
+                              style: const TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF212121),
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '🎯 Goal: Fat Loss',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.blue[700],
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Goal: ${_goalLabel(context.read<UserProvider>().currentProfile?.fitnessGoal?.name)}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF9E9E9E),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.emoji_events,
-                            color: Colors.grey[800],
-                            size: 28,
+                      // Achievements
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AchievementScreen(),
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const AchievementScreen(),
-                              ),
-                            );
-                          },
+                        ),
+                        child: Icon(
+                          Icons.emoji_events_outlined,
+                          color: Colors.grey[700],
+                          size: 26,
                         ),
                       ),
-
-                      SizedBox(width: 8),
-
-                      // Bell icon with unread badge
+                      const SizedBox(width: 16),
+                      // Notifications
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const NotificationScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            shape: BoxShape.circle,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationScreen(),
                           ),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                Icons.notifications_outlined,
-                                color: Colors.grey[800],
-                                size: 28,
-                              ),
-                              if (context
-                                      .watch<NotificationProvider>()
-                                      .unreadCount >
-                                  0)
-                                Positioned(
-                                  right: -2,
-                                  top: -2,
-                                  child: Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              Icons.notifications_outlined,
+                              color: Colors.grey[700],
+                              size: 26,
+                            ),
+                            if (context
+                                    .watch<NotificationProvider>()
+                                    .unreadCount >
+                                0)
+                              Positioned(
+                                right: -2,
+                                top: -2,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 SizedBox(height: 20),
 
                 // Today's Plan Card
-                Container(
-                  padding: EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1E88E5), Color(0xFF1565C0)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFF1E88E5).withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Today's Plan",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                Builder(
+                  builder: (context) {
+                    final today = context.watch<WeeklyProgramProvider>().today;
+                    final isRestDay = today?.isRestDay ?? false;
+                    final routineName = today?.routine?.name;
+
+                    return Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1E88E5), Color(0xFF1565C0)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ),
-                      SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.fitness_center,
-                            color: Colors.white,
-                            size: 28,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFF1E88E5).withOpacity(0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
                           ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Workout: Upper Body',
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            "Today's Plan",
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.restaurant_menu,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Meal: High Protein Lunch',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Color(0xFF1E88E5),
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.fitness_center,
+                                color: Colors.white,
+                                size: 28,
                               ),
-                              child: Text(
-                                'Start Now',
-                                style: TextStyle(
+                              const SizedBox(width: 12),
+                              Text(
+                                isRestDay
+                                    ? 'Workout: Rest Day'
+                                    : 'Workout: ${routineName ?? 'No plan set'}',
+                                style: const TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.3),
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const StartWorkoutScreen(),
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: const Color(0xFF1E88E5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: const Text(
+                                    'Start Now',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                                elevation: 0,
                               ),
-                              child: Text(
-                                'View Plan',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const WeeklyProgramScreen(),
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withOpacity(
+                                      0.3,
+                                    ),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: const Text(
+                                    'View Plan',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
 
                 SizedBox(height: 20),

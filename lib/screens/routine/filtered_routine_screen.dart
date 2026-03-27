@@ -2,83 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/routine/routine_model.dart';
 import '../../providers/routine/routine_provider.dart';
+import '../../providers/auth/auth_provider.dart';
 import '../../widgets/common.dart';
 import 'create_routine_screen.dart';
 import 'routine_detail_screenV2.dart';
 import 'widgets/routine_card.dart';
 import '../workout/active_workout_screen_v2.dart';
 
-
 class FilteredRoutineScreen extends StatelessWidget {
   final String filter;
 
   const FilteredRoutineScreen({super.key, required this.filter});
 
-  // Returns the screen title based on the filter
   String _getTitle() {
-    if (filter == 'mine') {
-      return 'My Routines';
-    } else if (filter == 'trainer') {
-      return 'From Trainer';
-    } else if (filter == 'reviewed') {
-      return 'Reviewed by Trainer';
-    }
+    if (filter == 'mine') return 'My Routines';
+    if (filter == 'trainer') return 'From Trainer';
+    if (filter == 'reviewed') return 'Reviewed by Trainer';
+    if (filter == 'ai') return 'AI Generated';
     return 'Routines';
   }
 
-  // Returns the empty state message based on the filter
   String _getEmptyTitle() {
-    if (filter == 'mine') {
-      return 'No routines yet';
-    } else if (filter == 'trainer') {
-      return 'No trainer routines yet';
-    } else if (filter == 'reviewed') {
-      return 'No reviewed routines yet';
-    }
+    if (filter == 'mine') return 'No routines yet';
+    if (filter == 'trainer') return 'No trainer routines yet';
+    if (filter == 'reviewed') return 'No reviewed routines yet';
+    if (filter == 'ai') return 'No AI routines yet';
     return 'No routines found';
   }
 
-  // Returns the empty state subtitle based on the filter
   String _getEmptySubtitle() {
-    if (filter == 'mine') {
-      return 'Tap + to create your first routine';
-    } else if (filter == 'trainer') {
+    if (filter == 'mine') return 'Tap + to create your first routine';
+    if (filter == 'trainer')
       return 'Your trainer has not assigned any routines yet';
-    } else if (filter == 'reviewed') {
+    if (filter == 'reviewed')
       return 'Send a routine for review to get feedback from your trainer';
-    }
+    if (filter == 'ai') return 'Generate a routine from your profile';
     return '';
   }
 
-  // Filters the full routines list based on the filter string
   List<Routine> _getFilteredRoutines(List<Routine> allRoutines) {
     if (filter == 'mine') {
-      // Show only routines the user created themselves
-      final List<Routine> result = [];
-      for (final routine in allRoutines) {
-        if (routine.createdByTrainer == false) {
-          result.add(routine);
-        }
-      }
-      return result;
+      return allRoutines
+          .where((r) => r.createdByTrainer == false && r.isAIGenerated == false)
+          .toList();
     } else if (filter == 'trainer') {
-      // Show only routines the trainer created for the user
-      final List<Routine> result = [];
-      for (final routine in allRoutines) {
-        if (routine.createdByTrainer == true) {
-          result.add(routine);
-        }
-      }
-      return result;
+      return allRoutines.where((r) => r.createdByTrainer == true).toList();
     } else if (filter == 'reviewed') {
-      // Show only routines that have been reviewed by the trainer
-      final List<Routine> result = [];
-      for (final routine in allRoutines) {
-        if (routine.reviewStatus == 'reviewed') {
-          result.add(routine);
-        }
-      }
-      return result;
+      return allRoutines.where((r) => r.reviewStatus == 'reviewed').toList();
+    } else if (filter == 'ai') {
+      return allRoutines.where((r) => r.isAIGenerated == true).toList();
     }
     return allRoutines;
   }
@@ -88,14 +60,11 @@ class FilteredRoutineScreen extends StatelessWidget {
       context,
       MaterialPageRoute(builder: (_) => const CreateRoutineScreen()),
     );
-
-    // Refresh the full list when coming back
     if (context.mounted) {
       context.read<RoutineProvider>().fetchRoutines();
     }
   }
 
-  // Start a workout from a routine
   Future<void> _startWorkout(BuildContext context, String routineId) async {
     final provider = context.read<RoutineProvider>();
     await provider.fetchRoutineById(routineId);
@@ -103,7 +72,6 @@ class FilteredRoutineScreen extends StatelessWidget {
     final routine = provider.selectedRoutine;
     if (routine == null) return;
 
-    // Build the prefilled exercises list for the active workout screen
     final List<Map<String, dynamic>> prefilled = [];
     for (final re in routine.exercises) {
       if (re.exercise == null) continue;
@@ -146,7 +114,7 @@ class FilteredRoutineScreen extends StatelessWidget {
       appBar: AppTopBar(
         title: _getTitle(),
         actions: [
-          // Only show the + button for the 'mine' filter
+          // Show + button for mine filter
           if (filter == 'mine')
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -163,22 +131,30 @@ class FilteredRoutineScreen extends StatelessWidget {
                 ),
               ),
             ),
+
+          // Show generate button in app bar for ai filter
+          if (filter == 'ai')
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: _GenerateButton(),
+            ),
         ],
       ),
       body: Consumer<RoutineProvider>(
         builder: (context, provider, _) {
-          // Show loading spinner if routines are still being fetched
           if (provider.isLoading && provider.routines.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Filter the routines list based on the filter string
           final List<Routine> filteredRoutines = _getFilteredRoutines(
             provider.routines,
           );
 
-          // Show empty state if no routines match the filter
+          // Show AI empty state with generate button
           if (filteredRoutines.isEmpty) {
+            if (filter == 'ai') {
+              return const _AIEmptyState();
+            }
             return EmptyState(
               icon: Icons.list_alt_rounded,
               title: _getEmptyTitle(),
@@ -186,7 +162,6 @@ class FilteredRoutineScreen extends StatelessWidget {
             );
           }
 
-          // Show the filtered list of routine cards
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: filteredRoutines.length,
@@ -197,7 +172,6 @@ class FilteredRoutineScreen extends StatelessWidget {
               return RoutineCard(
                 routine: routine,
                 onTap: () async {
-                  // Load the full routine detail then open detail screen
                   provider.fetchRoutineById(routine.id);
                   await Navigator.push(
                     context,
@@ -205,7 +179,6 @@ class FilteredRoutineScreen extends StatelessWidget {
                       builder: (_) => const RoutineDetailScreen(),
                     ),
                   );
-                  // Refresh when coming back in case something changed
                   if (context.mounted) {
                     context.read<RoutineProvider>().fetchRoutines();
                   }
@@ -215,6 +188,168 @@ class FilteredRoutineScreen extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+// Generate button shown in the app bar when routines already exist
+class _GenerateButton extends StatefulWidget {
+  const _GenerateButton();
+
+  @override
+  State<_GenerateButton> createState() => _GenerateButtonState();
+}
+
+class _GenerateButtonState extends State<_GenerateButton> {
+  bool _isGenerating = false;
+
+  Future<void> _generate() async {
+    final authProvider = context.read<AuthProvider>();
+    final routineProvider = context.read<RoutineProvider>();
+
+    if (authProvider.user?.plan != 'pro') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upgrade to Pro to generate AI routines')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isGenerating = true;
+    });
+
+    final success = await routineProvider.generateRoutine();
+
+    if (mounted) {
+      setState(() {
+        _isGenerating = false;
+      });
+
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              routineProvider.error ?? 'Failed to generate routine',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _isGenerating ? null : _generate,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: kPrimary,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: _isGenerating
+            ? const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(color: kWhite, strokeWidth: 2),
+              )
+            : const Row(
+                children: [
+                  Icon(Icons.auto_awesome, color: kWhite, size: 14),
+                  SizedBox(width: 4),
+                  Text(
+                    'Generate',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: kWhite,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+// Empty state shown when no AI routines exist yet
+class _AIEmptyState extends StatefulWidget {
+  const _AIEmptyState();
+
+  @override
+  State<_AIEmptyState> createState() => _AIEmptyStateState();
+}
+
+class _AIEmptyStateState extends State<_AIEmptyState> {
+  bool _isGenerating = false;
+
+  Future<void> _generate() async {
+    final authProvider = context.read<AuthProvider>();
+    final routineProvider = context.read<RoutineProvider>();
+
+    if (authProvider.user?.plan != 'pro') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upgrade to Pro to generate AI routines')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isGenerating = true;
+    });
+
+    final success = await routineProvider.generateRoutine();
+
+    if (mounted) {
+      setState(() {
+        _isGenerating = false;
+      });
+
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              routineProvider.error ?? 'Failed to generate routine',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.auto_awesome, size: 48, color: kTextHint),
+            const SizedBox(height: 12),
+            const Text(
+              'No AI routines yet',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: kTextGrey,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Generate a personalized routine based on your fitness profile',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: kTextHint),
+            ),
+            const SizedBox(height: 24),
+            PrimaryButton(
+              text: 'Generate Routine',
+              isLoading: _isGenerating,
+              onTap: _isGenerating ? null : _generate,
+            ),
+          ],
+        ),
       ),
     );
   }

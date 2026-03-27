@@ -11,11 +11,22 @@ enum Gender {
         (e) => e.name.toLowerCase() == value.toLowerCase(),
       );
     } catch (e) {
-      return null; // Return null if invalid value
+      return null;
     }
   }
 
   String toJson() => name;
+
+  String get label {
+    switch (this) {
+      case Gender.male:
+        return 'Male';
+      case Gender.female:
+        return 'Female';
+      case Gender.other:
+        return 'Other';
+    }
+  }
 }
 
 enum FitnessGoal {
@@ -35,6 +46,17 @@ enum FitnessGoal {
   }
 
   String toJson() => name;
+
+  String get label {
+    switch (this) {
+      case FitnessGoal.lose_fat:
+        return 'Lose Fat';
+      case FitnessGoal.gain_muscle:
+        return 'Gain Muscle';
+      case FitnessGoal.maintain:
+        return 'Maintain';
+    }
+  }
 }
 
 enum ActivityLevel {
@@ -56,6 +78,54 @@ enum ActivityLevel {
   }
 
   String toJson() => name;
+
+  String get label {
+    switch (this) {
+      case ActivityLevel.sedentary:
+        return 'Sedentary';
+      case ActivityLevel.light:
+        return 'Light';
+      case ActivityLevel.moderate:
+        return 'Moderate';
+      case ActivityLevel.active:
+        return 'Active';
+      case ActivityLevel.very_active:
+        return 'Very Active';
+    }
+  }
+}
+
+enum EquipmentAccess {
+  full_gym,
+  garage_gym,
+  dumbbell_only,
+  at_home;
+
+  static EquipmentAccess? fromString(String? value) {
+    if (value == null) return null;
+    try {
+      return EquipmentAccess.values.firstWhere(
+        (e) => e.name.toLowerCase() == value.toLowerCase(),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String toJson() => name;
+
+  String get label {
+    switch (this) {
+      case EquipmentAccess.full_gym:
+        return 'Full Gym';
+      case EquipmentAccess.garage_gym:
+        return 'Garage Gym';
+      case EquipmentAccess.dumbbell_only:
+        return 'Dumbbells Only';
+      case EquipmentAccess.at_home:
+        return 'At Home';
+    }
+  }
 }
 
 class User {
@@ -66,6 +136,8 @@ class User {
   final String? oauthId;
   final DateTime? createdAt;
   final UserProfile? profile;
+  final String plan;
+  final String role;
 
   User({
     required this.id,
@@ -75,7 +147,13 @@ class User {
     this.oauthId,
     this.createdAt,
     this.profile,
+    this.plan = 'free',
+    this.role = 'user',
   });
+
+  bool get isOAuth => oauthProvider != null;
+  bool get isPro => plan == 'pro';
+  bool get isTrainer => role == 'trainer';
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -90,6 +168,8 @@ class User {
       profile: json['profile'] != null
           ? UserProfile.fromJson(json['profile'])
           : null,
+      plan: json['plan'] ?? 'free',
+      role: json['role'] ?? 'user',
     );
   }
 
@@ -101,6 +181,8 @@ class User {
     'oauthId': oauthId,
     'createdAt': createdAt?.toIso8601String(),
     'profile': profile?.toJson(),
+    'plan': plan,
+    'role': role,
   };
 }
 
@@ -111,6 +193,7 @@ class UserProfile {
   final double? currentWeightKg;
   final FitnessGoal? fitnessGoal;
   final ActivityLevel? activityLevel;
+  final EquipmentAccess? equipmentAccess;
   final bool isOnboardingComplete;
 
   UserProfile({
@@ -120,6 +203,7 @@ class UserProfile {
     this.currentWeightKg,
     this.fitnessGoal,
     this.activityLevel,
+    this.equipmentAccess,
     this.isOnboardingComplete = false,
   });
 
@@ -133,6 +217,7 @@ class UserProfile {
       currentWeightKg: (json['currentWeightKg'] as num?)?.toDouble(),
       fitnessGoal: FitnessGoal.fromString(json['fitnessGoal']),
       activityLevel: ActivityLevel.fromString(json['activityLevel']),
+      equipmentAccess: EquipmentAccess.fromString(json['equipmentAccess']),
       isOnboardingComplete: json['isOnboardingComplete'] ?? false,
     );
   }
@@ -144,6 +229,7 @@ class UserProfile {
     'currentWeightKg': currentWeightKg,
     'fitnessGoal': fitnessGoal?.toJson(),
     'activityLevel': activityLevel?.toJson(),
+    'equipmentAccess': equipmentAccess?.toJson(),
     'isOnboardingComplete': isOnboardingComplete,
   };
 }

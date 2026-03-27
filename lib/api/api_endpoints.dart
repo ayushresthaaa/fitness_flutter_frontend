@@ -14,8 +14,11 @@ class ApiEndpoints {
   static const String getUsers = '/auth/getusers'; // GET (test)
 
   //users endpoint
-  static const String onboarding = '/users/me/onboarding'; // POST
-
+  static const String onboarding = '/users/me/onboarding';
+  static const String me = '/auth/me';
+  static const String updateAccount = '/users/me';
+  static const String updateProfile = '/users/me/profile';
+  static const String changePassword = '/users/me/password';
   //exercises enpoints
   // Meta (no auth required)
   static const String exerciseMuscles = '/exercises/meta/muscles'; // GET
@@ -107,8 +110,9 @@ class ApiEndpoints {
   static const String orders = '/orders';
   static String orderById(String id) => '/orders/$id';
 
-
   // Payment endpoints
   static const String initiatePayment = '/payments/initiate';
   static const String verifyPayment = '/payments/verify';
+
+  static const String generateRoutine = '/ml/generate';
 }

@@ -55,92 +55,82 @@ class _FrequencyChartState extends State<FrequencyChart> {
 
           const SizedBox(height: 16),
 
-          // Chart
-          SizedBox(
-            height: 140,
-            child: _isWeekly ? _buildWeeklyChart() : _buildMonthlyChart(),
-          ),
+          _isWeekly ? _buildWeeklyView() : _buildMonthlyChart(),
         ],
       ),
     );
   }
 
-  Widget _buildWeeklyChart() {
+  // Weekly — circles with workout count per day
+  Widget _buildWeeklyView() {
     final data = widget.weeklyData;
 
     if (data.isEmpty) {
       return const Center(
-        child: Text(
-          'No data yet',
-          style: TextStyle(fontSize: 13, color: kTextGrey),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Text(
+            'No data yet',
+            style: TextStyle(fontSize: 13, color: kTextGrey),
+          ),
         ),
       );
     }
 
-    final maxY =
-        data.map((d) => d.workouts.toDouble()).reduce((a, b) => a > b ? a : b) +
-        1;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: data.map((day) {
+        final hasWorkout = day.workouts > 0;
 
-    return BarChart(
-      BarChartData(
-        maxY: maxY,
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, _) {
-                final index = value.toInt();
-                if (index < 0 || index >= data.length) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(top: 6),
+        return Expanded(
+          child: Column(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: hasWorkout ? kPrimary : kBackground,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
                   child: Text(
-                    data[index].day,
-                    style: const TextStyle(fontSize: 11, color: kTextGrey),
+                    '${day.workouts}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: hasWorkout ? kWhite : kTextHint,
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ),
-        barGroups: List.generate(data.length, (i) {
-          final hasWorkout = data[i].workouts > 0;
-          return BarChartGroupData(
-            x: i,
-            barRods: [
-              BarChartRodData(
-                toY: hasWorkout ? data[i].workouts.toDouble() : 0.3,
-                color: hasWorkout ? kPrimary : const Color(0xFFEEEEEE),
-                width: 22,
-                borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                day.day,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: hasWorkout ? kTextDark : kTextGrey,
+                ),
               ),
             ],
-          );
-        }),
-      ),
+          ),
+        );
+      }).toList(),
     );
   }
 
+  // Monthly — bar chart
   Widget _buildMonthlyChart() {
     final data = widget.monthlyData;
 
     if (data.isEmpty) {
       return const Center(
-        child: Text(
-          'No data yet',
-          style: TextStyle(fontSize: 13, color: kTextGrey),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Text(
+            'No data yet',
+            style: TextStyle(fontSize: 13, color: kTextGrey),
+          ),
         ),
       );
     }
@@ -149,54 +139,57 @@ class _FrequencyChartState extends State<FrequencyChart> {
         data.map((d) => d.workouts.toDouble()).reduce((a, b) => a > b ? a : b) +
         1;
 
-    return BarChart(
-      BarChartData(
-        maxY: maxY,
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, _) {
-                final index = value.toInt();
-                if (index < 0 || index >= data.length) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    data[index].label.split(' ')[0],
-                    style: const TextStyle(fontSize: 11, color: kTextGrey),
-                  ),
-                );
-              },
+    return SizedBox(
+      height: 140,
+      child: BarChart(
+        BarChartData(
+          maxY: maxY,
+          gridData: const FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index < 0 || index >= data.length) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      data[index].label.split(' ')[0],
+                      style: const TextStyle(fontSize: 11, color: kTextGrey),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
+          barGroups: List.generate(data.length, (i) {
+            final hasWorkout = data[i].workouts > 0;
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: hasWorkout ? data[i].workouts.toDouble() : 0.3,
+                  color: hasWorkout ? kPrimary : const Color(0xFFEEEEEE),
+                  width: 28,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ],
+            );
+          }),
         ),
-        barGroups: List.generate(data.length, (i) {
-          final hasWorkout = data[i].workouts > 0;
-          return BarChartGroupData(
-            x: i,
-            barRods: [
-              BarChartRodData(
-                toY: hasWorkout ? data[i].workouts.toDouble() : 0.3,
-                color: hasWorkout ? kPrimary : const Color(0xFFEEEEEE),
-                width: 28,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ],
-          );
-        }),
       ),
     );
   }

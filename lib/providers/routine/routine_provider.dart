@@ -222,6 +222,17 @@ class RoutineProvider extends BaseProvider {
     }
   }
 
+  // Generate AI routine from user profile — requires pro plan
+  Future<bool> generateRoutine() async {
+    await execute(() => _service.generateRoutine());
+
+    if (!hasError) {
+      await fetchRoutines();
+      return true;
+    }
+    return false;
+  }
+
   // Clear selected routine
   void clearSelectedRoutine() {
     _selectedRoutine = null;

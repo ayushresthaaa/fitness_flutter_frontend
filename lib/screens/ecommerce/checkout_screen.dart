@@ -23,7 +23,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final PaymentService _paymentService = PaymentService();
-
+  double _orderTotal = 0;
   // Once order is placed we store it here and show the Khalti button
   Order? _placedOrder;
   bool _isInitiatingPayment = false;
@@ -36,7 +36,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-
   Future<void> _placeOrder() async {
     if (_nameController.text.trim().isEmpty ||
         _phoneController.text.trim().isEmpty ||
@@ -48,6 +47,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     final orderProvider = context.read<OrderProvider>();
+    final cartProvider = context.read<CartProvider>();
+
+    // Save total before clearing cart
+    final orderTotal = cartProvider.total;
 
     final order = await orderProvider.placeOrder(
       shippingName: _nameController.text.trim(),
@@ -56,10 +59,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
 
     if (order != null && mounted) {
-
-      await context.read<CartProvider>().clearCart();
+      await cartProvider.clearCart();
       setState(() {
         _placedOrder = order;
+        _orderTotal = orderTotal;
       });
     }
   }
@@ -72,7 +75,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
 
     try {
-
       final result = await _paymentService.initiatePayment(
         orderId: _placedOrder!.id,
       );
@@ -81,13 +83,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (!mounted) return;
 
-
       final payConfig = KhaltiPayConfig(
         publicKey: 'c022678dc644484daebba89b688110ec',
         pidx: pidx,
         environment: Environment.test,
       );
-
 
       final khalti = await Khalti.init(
         enableDebugging: true,
@@ -95,25 +95,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         onPaymentResult: (paymentResult, khalti) async {
           log('Payment result: $paymentResult');
 
-          // Payment done 
+          // Payment done
           await _verifyPayment(pidx, khalti);
         },
-        onMessage: (
-          khalti, {
-          description,
-          statusCode,
-          event,
-          needsPaymentConfirmation,
-        }) async {
-          log('Khalti message: $description');
+        onMessage:
+            (
+              khalti, {
+              description,
+              statusCode,
+              event,
+              needsPaymentConfirmation,
+            }) async {
+              log('Khalti message: $description');
 
-          // If payment confirmation is needed, verify with backend
-          if (needsPaymentConfirmation == true) {
-            await _verifyPayment(pidx, khalti);
-          } else {
-            khalti.close(context);
-          }
-        },
+              // If payment confirmation is needed, verify with backend
+              if (needsPaymentConfirmation == true) {
+                await _verifyPayment(pidx, khalti);
+              } else {
+                khalti.close(context);
+              }
+            },
         onReturn: () {
           log('Returned to app from Khalti');
         },
@@ -150,8 +151,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                OrderDetailScreen(orderId: _placedOrder!.id),
+            builder: (context) => OrderDetailScreen(orderId: _placedOrder!.id),
           ),
           (route) => route.settings.name == '/shop' || route.isFirst,
         );
@@ -239,7 +239,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                       Text(
-                        'Rs. ${cartProvider.total.toStringAsFixed(0)}',
+                        'Rs. ${_placedOrder != null ? _orderTotal.toStringAsFixed(0) : cartProvider.total.toStringAsFixed(0)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -254,7 +254,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
             const SizedBox(height: 16),
 
-            // Shipping details card 
+            // Shipping details card
             if (_placedOrder == null)
               Container(
                 padding: const EdgeInsets.all(16),
@@ -334,10 +334,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     Expanded(
                       child: Text(
                         'Order #${_placedOrder!.id.substring(_placedOrder!.id.length - 6).toUpperCase()} placed. Complete payment to confirm.',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: kTextDark,
-                        ),
+                        style: const TextStyle(fontSize: 13, color: kTextDark),
                       ),
                     ),
                   ],

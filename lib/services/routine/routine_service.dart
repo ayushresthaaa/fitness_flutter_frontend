@@ -138,4 +138,9 @@ class RoutineService {
   Future<void> sendRoutineForReview(String routineId) async {
     await _dio.post(ApiEndpoints.sendRoutineForReview(routineId));
   }
+
+  // POST /api/routines/generate — requires pro plan
+  Future<void> generateRoutine() async {
+    await _dio.post(ApiEndpoints.generateRoutine);
+  }
 }

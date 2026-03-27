@@ -141,6 +141,8 @@ class AppTextField extends StatelessWidget {
   final String hint;
   final TextInputType keyboardType;
   final int maxLines;
+  final bool enabled;
+  final bool obscureText;
 
   const AppTextField({
     super.key,
@@ -148,19 +150,23 @@ class AppTextField extends StatelessWidget {
     required this.hint,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
+    this.enabled = true,
+    this.obscureText = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: kWhite,
+        color: enabled ? kWhite : kBackground,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        enabled: enabled,
+        obscureText: obscureText,
         style: const TextStyle(fontSize: 14, color: kTextDark),
         decoration: InputDecoration(
           hintText: hint,
