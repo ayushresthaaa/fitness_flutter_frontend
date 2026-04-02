@@ -113,6 +113,15 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   _ActionRow(
+                    icon: Icons.payment_outlined,
+                    label: 'View Your Plan',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Plans coming soon')),
+                      );
+                    },
+                  ),
+                  _ActionRow(
                     icon: Icons.fitness_center_outlined,
                     label: 'Fitness Profile',
                     onTap: () => Navigator.push(
@@ -161,6 +170,15 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   _ActionRow(
+                    icon: Icons.person_pin_outlined,
+                    label: 'View/Change Your Trainer',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Page coming soon')),
+                      );
+                    },
+                  ),
+                  _ActionRow(
                     icon: Icons.logout,
                     label: 'Log Out',
                     isLast: true,
@@ -169,6 +187,7 @@ class ProfileScreen extends StatelessWidget {
                       await context.read<AuthProvider>().logout();
                     },
                   ),
+
                 ],
               ),
             ),

@@ -114,5 +114,21 @@ class ApiEndpoints {
   static const String initiatePayment = '/payments/initiate';
   static const String verifyPayment = '/payments/verify';
 
-  static const String generateRoutine = '/ml/generate';
+  static const String generateRoutine = '/mlv2/generate';
+
+  //meal endpoints
+  static const String mealGoal = '/meal/goal';
+  static const String mealFoods = '/meal/foods';
+  static const String mealFoodsRecent = '/meal/foods/recent';
+  static const String mealFoodsCustom = '/meal/foods/custom';
+  static String mealFoodsCustomById(String id) => '/meal/foods/custom/$id';
+  static const String mealLogToday = '/meal/log/today';
+  static String mealLogByDate(String date) => '/meal/log/$date';
+  static const String mealLogSlots = '/meal/log/slots';
+  static String mealLogSlotItems(String slotId) => '/meal/log/$slotId/items';
+  static String mealLogItemById(String itemId) => '/meal/log/items/$itemId';
+  static const String mealLogWater = '/meal/log/today/water';
+  static const String mealLogWaterGoal = '/meal/log/today/water-goal';
+  static const String mealInsights = '/meal/insights';
+  static const String mealHistory = '/meal/history';
 }
