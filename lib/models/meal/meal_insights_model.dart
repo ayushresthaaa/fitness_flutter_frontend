@@ -43,7 +43,7 @@ class WeeklyChartDay {
     };
   }
 
-  // bar height ratio — capped at 1.5x so chart doesn't break on over-eating days
+  // bar height ratio — capped at 1.5x so chart does not break on over-eating days
   double get heightRatio => goal > 0 ? (consumed / goal).clamp(0.0, 1.5) : 0;
 }
 
@@ -84,6 +84,42 @@ class GoalHitRates {
 }
 
 // ─────────────────────────────────────────
+// WEEKLY AVERAGES
+// ─────────────────────────────────────────
+
+class WeeklyAverages {
+  final int calories;
+  final int protein;
+  final int carbs;
+  final int fat;
+
+  WeeklyAverages({
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+  });
+
+  factory WeeklyAverages.fromJson(Map<String, dynamic> json) {
+    return WeeklyAverages(
+      calories: (json['calories'] as num?)?.toInt() ?? 0,
+      protein: (json['protein'] as num?)?.toInt() ?? 0,
+      carbs: (json['carbs'] as num?)?.toInt() ?? 0,
+      fat: (json['fat'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+    };
+  }
+}
+
+// ─────────────────────────────────────────
 // MEAL INSIGHTS
 // ─────────────────────────────────────────
 
@@ -91,12 +127,14 @@ class MealInsights {
   final int nutritionScore;
   final int loggingStreak;
   final GoalHitRates goalHitRates;
+  final WeeklyAverages weeklyAverages;
   final List<WeeklyChartDay> weeklyCalorieChart;
 
   MealInsights({
     required this.nutritionScore,
     required this.loggingStreak,
     required this.goalHitRates,
+    required this.weeklyAverages,
     required this.weeklyCalorieChart,
   });
 
@@ -105,6 +143,7 @@ class MealInsights {
       nutritionScore: (json['nutritionScore'] as num?)?.toInt() ?? 0,
       loggingStreak: (json['loggingStreak'] as num?)?.toInt() ?? 0,
       goalHitRates: GoalHitRates.fromJson(json['goalHitRates']),
+      weeklyAverages: WeeklyAverages.fromJson(json['weeklyAverages']),
       weeklyCalorieChart: (json['weeklyCalorieChart'] as List? ?? [])
           .map((e) => WeeklyChartDay.fromJson(e))
           .toList(),
@@ -116,6 +155,7 @@ class MealInsights {
       'nutritionScore': nutritionScore,
       'loggingStreak': loggingStreak,
       'goalHitRates': goalHitRates.toJson(),
+      'weeklyAverages': weeklyAverages.toJson(),
       'weeklyCalorieChart': weeklyCalorieChart.map((e) => e.toJson()).toList(),
     };
   }
@@ -125,6 +165,16 @@ class MealInsights {
     if (nutritionScore >= 60) return 'Good';
     if (nutritionScore >= 40) return 'Fair';
     return 'Needs work';
+  }
+
+  // emoji-free label icon name for the score — used in the score card
+  String get scoreSummary {
+    if (nutritionScore >= 80) return 'You\'re crushing it!';
+    if (nutritionScore >= 60)
+      return 'Protein slightly below target, everything else on track.';
+    if (nutritionScore >= 40)
+      return 'Room to improve — focus on hitting your macros.';
+    return 'Start logging consistently to build your score.';
   }
 }
 

@@ -2,7 +2,12 @@ class ApiEndpoints {
   static const String ip = '192.168.1.76';
   // Base
   // static const String baseUrl = 'http://192.168.1.76:4000/api';
-  static const String baseUrl = 'http://192.168.1.76:4000/api';
+  static const String baseUrl =
+      'https://antral-susan-undazed.ngrok-free.dev/api';
+
+  // Static files host (images, etc.)
+  static const String staticHost =
+      'https://antral-susan-undazed.ngrok-free.dev';
 
   //authentication endpoints
   static const String login = '/auth/login';

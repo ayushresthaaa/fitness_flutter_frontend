@@ -7,8 +7,21 @@ class ExerciseDetailScreen extends StatelessWidget {
   final Exercise exercise;
 
   const ExerciseDetailScreen({super.key, required this.exercise});
-
-  String _fixUrl(String url) => url.replaceAll('localhost', ApiEndpoints.ip);
+  String _fixUrl(String url) {
+    if (url.startsWith('http://localhost:4000')) {
+      // Replace localhost with Ngrok
+      return url.replaceFirst(
+        RegExp(r'http://localhost:4000'),
+        ApiEndpoints.staticHost,
+      );
+    } else if (!url.startsWith('http')) {
+      // Relative path -> prepend staticHost
+      return '${ApiEndpoints.staticHost}/$url';
+    } else {
+      // Full URL (already ngrok or external)
+      return url;
+    }
+  }
 
   String _capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
@@ -23,7 +36,6 @@ class ExerciseDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-   
             // Swipeable image gallery
             if (exercise.images.isNotEmpty)
               SizedBox(
@@ -43,19 +55,6 @@ class ExerciseDetailScreen extends StatelessWidget {
                               size: 40,
                               color: kPrimary,
                             ),
-                            loadingBuilder: (_, child, progress) {
-                              if (progress == null) return child;
-                              return const Center(
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: kPrimary,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            },
                           ),
                         ),
                       )

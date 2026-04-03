@@ -33,9 +33,27 @@ class CustomExercise {
 
   factory CustomExercise.fromJson(Map<String, dynamic> json) {
     final rawImages = json['images'] as List? ?? [];
-    final images = rawImages
-        .map((e) => (e as String).replaceAll('localhost', ApiEndpoints.ip))
-        .toList();
+    final images = rawImages.map((e) {
+      final path = e as String;
+
+      String finalUrl;
+      if (path.startsWith('http://localhost:4000')) {
+        // Replace localhost with Ngrok
+        finalUrl = path.replaceFirst(
+          RegExp(r'http://localhost:4000'),
+          ApiEndpoints.staticHost,
+        );
+      } else if (!path.startsWith('http')) {
+        // Only prepend ApiEndpoints.staticHost once, don't add extra /static
+        finalUrl = '${ApiEndpoints.staticHost}/$path';
+      } else {
+        // Already full URL (ngrok/external)
+        finalUrl = path;
+      }
+
+      print('Exercise image URL: $finalUrl'); // Debugging
+      return finalUrl;
+    }).toList();
 
     return CustomExercise(
       id: json['id'],

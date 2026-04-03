@@ -18,6 +18,10 @@ import './providers/notification/notification_provider.dart';
 import './providers/ecommerce/product_provider.dart';
 import './providers/ecommerce/cart_provider.dart';
 import './providers/ecommerce/order_provider.dart';
+import './providers/meal/food_provider.dart';
+import './providers/meal/meal_log_provider.dart';
+import './providers/meal/meal_insights_provider.dart';
+import './providers/meal/nutrition_goal_provider.dart';
 // Import your routes
 import 'routes/app_routes.dart';
 
@@ -78,6 +82,16 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<CartProvider>(create: (_) => CartProvider()),
         ChangeNotifierProvider<OrderProvider>(create: (_) => OrderProvider()),
+        ChangeNotifierProvider<FoodProvider>(create: (_) => FoodProvider()),
+        ChangeNotifierProvider<MealLogProvider>(
+          create: (_) => MealLogProvider(),
+        ),
+        ChangeNotifierProvider<MealInsightsProvider>(
+          create: (_) => MealInsightsProvider(),
+        ),
+        ChangeNotifierProvider<NutritionGoalProvider>(
+          create: (_) => NutritionGoalProvider(),
+        ),
       ],
       builder: (context, child) {
         context.read<AuthProvider>().onNewNotification = (notification) {

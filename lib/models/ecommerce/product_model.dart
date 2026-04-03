@@ -46,9 +46,26 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final rawImageUrls = json['imageUrls'] as List? ?? [];
-    final imageUrls = rawImageUrls
-        .map((url) => (url as String).replaceAll('localhost', ApiEndpoints.ip))
-        .toList();
+    final imageUrls = rawImageUrls.map((url) {
+      final path = url as String;
+
+      String finalUrl;
+      if (path.startsWith('http://localhost:4000')) {
+        finalUrl = path.replaceFirst(
+          RegExp(r'http://localhost:4000'),
+          ApiEndpoints.staticHost,
+        );
+      } else if (!path.startsWith('http')) {
+        finalUrl = '${ApiEndpoints.staticHost}/static/$path';
+      } else {
+        finalUrl = path;
+      }
+
+      // Debug print for each image URL
+      print('Product image URL: $finalUrl');
+
+      return finalUrl;
+    }).toList();
 
     return Product(
       id: json['id'] ?? '',

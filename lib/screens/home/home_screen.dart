@@ -20,6 +20,7 @@ import '../../providers/user/user.provider.dart';
 import '../../providers/routine/weekly_program_provider.dart';
 import '../../widgets/common.dart';
 import '../../screens/user_profile/user_profile_screen.dart';
+import '../../screens/meal/meal_planner_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -341,7 +342,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: _buildQuickActionCard(
                         icon: Icons.restaurant,
                         label: 'Meal',
-                        onTap: () {},
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MealPlannerScreen(),
+                          ),
+                        ),
                       ),
                     ),
                   ],

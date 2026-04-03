@@ -9,7 +9,20 @@ class HowToTab extends StatelessWidget {
   const HowToTab({super.key, required this.exercise});
 
   String _fixUrl(String url) {
-    return url.replaceAll('localhost', ApiEndpoints.ip);
+    if (url.contains('192.168.1.76:4000') ||
+        url.startsWith('http://localhost:4000')) {
+      // Replace local IP / localhost with Ngrok
+      return url.replaceAll(
+        RegExp(r'http://(localhost|192\.168\.1\.76):4000'),
+        ApiEndpoints.staticHost,
+      );
+    } else if (!url.startsWith('http')) {
+      // Relative path -> prepend staticHost
+      return '${ApiEndpoints.staticHost}/$url';
+    } else {
+      // Full URL (already ngrok or external)
+      return url;
+    }
   }
 
   String _capitalize(String s) {
@@ -19,6 +32,14 @@ class HowToTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (exercise.images.isNotEmpty) {
+      for (var url in exercise.images) {
+        final finalUrl = _fixUrl(url);
+        debugPrint('HowToTab loading image URL: $finalUrl');
+      }
+    } else {
+      debugPrint('HowToTab: no images for this exercise');
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -37,31 +58,16 @@ class HowToTab extends StatelessWidget {
                       child: Image.network(
                         _fixUrl(url),
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) {
-                          return Container(
-                            color: kBackground,
-                            child: const Center(
-                              child: Icon(
-                                Icons.fitness_center,
-                                size: 40,
-                                color: kPrimary,
-                              ),
+                        errorBuilder: (_, __, ___) => Container(
+                          color: kBackground,
+                          child: const Center(
+                            child: Icon(
+                              Icons.fitness_center,
+                              size: 40,
+                              color: kPrimary,
                             ),
-                          );
-                        },
-                        loadingBuilder: (_, child, progress) {
-                          if (progress == null) return child;
-                          return const Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: kPrimary,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
                     ),
                   );

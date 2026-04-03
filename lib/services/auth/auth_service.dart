@@ -7,7 +7,8 @@ import '../../models/user/user.dart';
 
 class AuthService {
   final String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.76:4000/api';
+      dotenv.env['API_BASE_URL'] ??
+      'https://antral-susan-undazed.ngrok-free.dev/api'; // Fallback to hardcoded URL if .env is not loaded
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     serverClientId:
