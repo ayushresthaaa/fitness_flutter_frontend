@@ -119,7 +119,7 @@ class ApiEndpoints {
   static const String initiatePayment = '/payments/initiate';
   static const String verifyPayment = '/payments/verify';
 
-  static const String generateRoutine = '/mlv2/generate';
+  static const String generateRoutine = '/mlv3/generate';
 
   //meal endpoints
   static const String mealGoal = '/meal/goal';
@@ -135,5 +135,13 @@ class ApiEndpoints {
   static const String mealLogWater = '/meal/log/today/water';
   static const String mealLogWaterGoal = '/meal/log/today/water-goal';
   static const String mealInsights = '/meal/insights';
-  static const String mealHistory = '/meal/history';
+  static const String mealInsightHistory = '/meal/history';
+
+  // Trainer request — user side
+  static const String myTrainer = '/users/my-trainer';
+  static const String submitTrainerRequest = '/users/trainer-request';
+  static const String myTrainerRequests = '/users/trainer-request';
+
+  static const String mealHistory = '/meal/log/history';
+  static String mealLogReview(String date) => '/meal/log/$date/review';
 }

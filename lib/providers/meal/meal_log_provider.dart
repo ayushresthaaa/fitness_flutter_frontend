@@ -112,4 +112,30 @@ class MealLogProvider extends BaseProvider {
     });
     return result != null;
   }
+
+  List<MealHistoryItem> _history = [];
+  List<MealHistoryItem> get history => _history;
+
+  List<MealHistoryItem> get notSentLogs =>
+      _history.where((l) => l.notSent).toList();
+  List<MealHistoryItem> get pendingLogs =>
+      _history.where((l) => l.isPending).toList();
+  List<MealHistoryItem> get reviewedLogs =>
+      _history.where((l) => l.isReviewed).toList();
+
+  Future<void> loadHistory() async {
+    await execute(() async {
+      _history = await _service.getMealHistory();
+    });
+  }
+
+  Future<bool> sendLogForReview(String date) async {
+    final result = await execute(() async {
+      await _service.sendLogForReview(date);
+      await loadHistory();
+      _selectedLog = await _service.getLogByDate(date);
+      return true; // ← explicitly return true
+    });
+    return result == true; // check for true not just not null
+  }
 }

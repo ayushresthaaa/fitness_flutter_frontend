@@ -290,3 +290,47 @@ class MealLog {
   MealSlot? get dinner => slots.where((s) => s.type == 'dinner').firstOrNull;
   MealSlot? get snack => slots.where((s) => s.type == 'snack').firstOrNull;
 }
+
+class MealHistoryItem {
+  final String id;
+  final DateTime date;
+  final String? reviewStatus;
+  final String? trainerNotes;
+  final MacroTotals goals;
+  final MacroTotals totals;
+  final bool goalHit;
+
+  MealHistoryItem({
+    required this.id,
+    required this.date,
+    this.reviewStatus,
+    this.trainerNotes,
+    required this.goals,
+    required this.totals,
+    required this.goalHit,
+  });
+
+  factory MealHistoryItem.fromJson(Map<String, dynamic> json) {
+    return MealHistoryItem(
+      id: json['id'],
+      date: DateTime.parse(json['date']).toLocal(),
+      reviewStatus: json['reviewStatus'],
+      trainerNotes: json['trainerNotes'],
+      goals: MacroTotals.fromJson(json['goals']),
+      totals: MacroTotals.fromJson(json['totals']),
+      goalHit: json['goalHit'] ?? false,
+    );
+  }
+
+  bool get isPending => reviewStatus == 'pending';
+  bool get isReviewed => reviewStatus == 'reviewed';
+  bool get notSent => reviewStatus == null;
+  bool get isOverCalorieGoal => totals.calories > goals.calories;
+  String get dateLabel {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Yesterday';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}

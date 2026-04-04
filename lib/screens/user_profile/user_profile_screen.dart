@@ -8,6 +8,7 @@ import '../../screens/ecommerce/orders_screen.dart';
 import 'edit_profile_screen.dart';
 import 'edit_fitness_screen.dart';
 import 'change_password_screen.dart';
+import '../../screens/user/trainer_change_request_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -172,11 +173,12 @@ class ProfileScreen extends StatelessWidget {
                   _ActionRow(
                     icon: Icons.person_pin_outlined,
                     label: 'View/Change Your Trainer',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Page coming soon')),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TrainerChangeRequestScreen(),
+                      ),
+                    ),
                   ),
                   _ActionRow(
                     icon: Icons.logout,
@@ -187,7 +189,6 @@ class ProfileScreen extends StatelessWidget {
                       await context.read<AuthProvider>().logout();
                     },
                   ),
-
                 ],
               ),
             ),

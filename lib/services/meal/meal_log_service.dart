@@ -72,4 +72,17 @@ class MealLogService {
       data: {'waterGoalMl': waterGoalMl},
     );
   }
+
+  // Send a past log for trainer review
+  Future<void> sendLogForReview(String date) async {
+    await _dio.patch(ApiEndpoints.mealLogReview(date));
+  }
+
+  // Get last 30 days of meal history
+  Future<List<MealHistoryItem>> getMealHistory() async {
+    final res = await _dio.get(ApiEndpoints.mealHistory);
+    return (res.data['data'] as List)
+        .map((e) => MealHistoryItem.fromJson(e))
+        .toList();
+  }
 }
