@@ -17,6 +17,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  // Tracks whether the user tapped the email "Create Account" button
+  // so we only redirect to /login for email registration, not Google OAuth.
+  bool _registeredWithEmail = false;
 
   @override
   void dispose() {
@@ -30,6 +33,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+
+    // Only redirect to /login after email registration, not Google OAuth.
+    if (_registeredWithEmail && authProvider.user != null && authProvider.error == null && !authProvider.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -207,6 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: authProvider.isLoading
                         ? null
                         : () {
+                            setState(() => _registeredWithEmail = true);
                             authProvider.register(
                               _emailController.text.trim(),
                               _passwordController.text,

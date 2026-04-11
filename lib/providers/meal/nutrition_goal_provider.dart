@@ -25,7 +25,7 @@ class NutritionGoalProvider extends BaseProvider {
     double? carbs,
     double? fat,
   }) async {
-    final result = await execute(() async {
+    await execute(() async {
       _goal = await _service.updateGoals(
         calories: calories,
         protein: protein,
@@ -33,6 +33,7 @@ class NutritionGoalProvider extends BaseProvider {
         fat: fat,
       );
     });
-    return result != null;
+    // If execute caught an error it sets _error; no error means success.
+    return !hasError;
   }
 }

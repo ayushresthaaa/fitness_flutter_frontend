@@ -10,6 +10,7 @@ import 'edit_fitness_screen.dart';
 import 'change_password_screen.dart';
 import '../../screens/user/trainer_change_request_screen.dart';
 import '../../screens/reminders/reminders_screen.dart';
+import '../../screens/meal/nutrition_goal_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -130,6 +131,17 @@ class ProfileScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) => const EditFitnessScreen(),
+                      ),
+                    ),
+                  ),
+                  _ActionRow(
+                    icon: Icons.restaurant_menu_outlined,
+                    label: 'Nutrition Goal',
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const NutritionGoalScreen(isOnboarding: false),
                       ),
                     ),
                   ),

@@ -6,10 +6,10 @@ import '../screens/user/onboarding_screen.dart';
 class OnboardingGuard extends StatefulWidget {
   final Widget child;
 
-  const OnboardingGuard({Key? key, required this.child}) : super(key: key);
+  const OnboardingGuard({super.key, required this.child});
 
   @override
-  _OnboardingGuardState createState() => _OnboardingGuardState();
+  State<OnboardingGuard> createState() => _OnboardingGuardState();
 }
 
 class _OnboardingGuardState extends State<OnboardingGuard> {
@@ -29,7 +29,7 @@ class _OnboardingGuardState extends State<OnboardingGuard> {
         await userProvider.fetchUserProfile();
       }
     } catch (e) {
-      // print('Profile fetch failed: $e');
+      // ignore fetch errors — let the guard fall through
     } finally {
       if (mounted) {
         setState(() => _isChecking = false);
@@ -50,8 +50,9 @@ class _OnboardingGuardState extends State<OnboardingGuard> {
     final userProvider = context.watch<UserProvider>();
 
     if (!userProvider.hasCompletedOnboarding) {
+      final navigator = Navigator.of(context);
       Future.microtask(() {
-        Navigator.of(context).pushReplacementNamed(OnboardingScreen.routeName);
+        navigator.pushReplacementNamed(OnboardingScreen.routeName);
       });
       return const SizedBox.shrink();
     }

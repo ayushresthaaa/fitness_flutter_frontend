@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/meal/nutrition_goal_provider.dart';
+import '../../storage/local_storage.dart';
 import '../../widgets/common.dart';
 import '../home/home_screen.dart';
 
@@ -126,6 +127,12 @@ class _NutritionGoalScreenState extends State<NutritionGoalScreen> {
     if (!mounted) return;
 
     if (success) {
+      // Mark that the user has completed nutrition goal setup so the
+      // OnboardingGuard does not prompt them again on next app launch.
+      await LocalStorageService().setBool('nutrition_goal_set', true);
+
+      if (!mounted) return;
+
       if (widget.isOnboarding) {
         Navigator.pushReplacementNamed(context, HomeScreen.routeName);
       } else {

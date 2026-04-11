@@ -7,19 +7,19 @@ import '../../../models/meal/meal_log_model.dart';
 
 class CalorieCard extends StatelessWidget {
   final MealLog log;
-  final int burned; // ← add
+  final int burned;
 
   const CalorieCard({
     super.key,
     required this.log,
-    this.burned = 0, // ← default 0
+    this.burned = 0,
   });
 
   @override
   Widget build(BuildContext context) {
     final consumed = log.totals.calories.toInt();
     final goal = log.goals.calories.toInt();
-    final adjustedGoal = goal + burned; // ← real budget
+    final adjustedGoal = goal + burned;
     final remaining = adjustedGoal - consumed;
     final isOver = consumed > adjustedGoal;
     final progress = adjustedGoal > 0
