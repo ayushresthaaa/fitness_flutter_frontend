@@ -11,9 +11,11 @@ import '../../providers/auth/auth_provider.dart';
 import '../../providers/notification/notification_provider.dart';
 import '../../screens/notification/notification_screen.dart';
 import '../../screens/exercise/exercise_picker_screen_v2.dart';
+import '../../providers/home/home_provider.dart';
 import '../../screens/home/start_workout_screen.dart';
 import '../../screens/workout/active_workout_screen_v2.dart';
 import '../../screens/routine/routine_list_screen.dart';
+import '../../providers/meal/meal_log_provider.dart';
 import '../../screens/weekly_program/weekly_program_screen.dart';
 import '../../screens/ecommerce/product_list_screen.dart';
 import '../../providers/user/user.provider.dart';
@@ -21,6 +23,7 @@ import '../../providers/routine/weekly_program_provider.dart';
 import '../../widgets/common.dart';
 import '../../screens/user_profile/user_profile_screen.dart';
 import '../../screens/meal/meal_planner_screen.dart';
+import '../../providers/progress/stats_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home';
@@ -68,10 +71,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationProvider>().fetchUnreadCount();
-      context.read<WeeklyProgramProvider>().fetchToday();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+  }
+
+  void _loadData() {
+    print('_loadData called');
+    context.read<NotificationProvider>().fetchUnreadCount();
+    context.read<WeeklyProgramProvider>().fetchToday();
+    context.read<HomeProvider>().loadTodaySummary();
+    context.read<MealLogProvider>().loadTodayLog();
+    context.read<StatsProvider>().fetchAll();
   }
 
   @override
@@ -256,8 +265,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onPressed: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          const StartWorkoutScreen(),
+                                      builder: (_) => StartWorkoutScreen(
+                                        onWorkoutComplete: _loadData,
+                                      ),
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
@@ -332,7 +342,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const StartWorkoutScreen(),
+                            builder: (_) => StartWorkoutScreen(
+                              onWorkoutComplete: _loadData,
+                            ),
                           ),
                         ),
                       ),
@@ -347,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           MaterialPageRoute(
                             builder: (_) => const MealPlannerScreen(),
                           ),
-                        ),
+                        ).then((_) => _loadData()),
                       ),
                     ),
                   ],
@@ -390,90 +402,269 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(height: 24),
 
                 // Today's Progress Section
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        "TODAY'S PROGRESS",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E88E5),
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Calories:',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            '1420 / 2000kcal',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: 1420 / 2000,
-                          minHeight: 8,
-                          backgroundColor: Colors.grey[200],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF1E88E5),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Burned:',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            '350kcal',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                // Container(
+                //   padding: EdgeInsets.all(20),
+                //   decoration: BoxDecoration(
+                //     color: Colors.white,
+                //     borderRadius: BorderRadius.circular(20),
+                //     boxShadow: [
+                //       BoxShadow(
+                //         color: Colors.black.withOpacity(0.05),
+                //         blurRadius: 10,
+                //         offset: Offset(0, 2),
+                //       ),
+                //     ],
+                //   ),
+                //   child: Column(
+                //     children: [
+                //       Text(
+                //         "TODAY'S PROGRESS",
+                //         style: TextStyle(
+                //           fontSize: 14,
+                //           fontWeight: FontWeight.bold,
+                //           color: Color(0xFF1E88E5),
+                //           letterSpacing: 1.2,
+                //         ),
+                //       ),
+                //       SizedBox(height: 16),
+                //       Row(
+                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //         children: [
+                //           Text(
+                //             'Calories:',
+                //             style: TextStyle(
+                //               fontSize: 15,
+                //               color: Colors.grey[700],
+                //               fontWeight: FontWeight.w500,
+                //             ),
+                //           ),
+                //           Text(
+                //             '1420 / 2000kcal',
+                //             style: TextStyle(
+                //               fontSize: 15,
+                //               color: Colors.grey[700],
+                //               fontWeight: FontWeight.w600,
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //       SizedBox(height: 8),
+                //       ClipRRect(
+                //         borderRadius: BorderRadius.circular(10),
+                //         child: LinearProgressIndicator(
+                //           value: 1420 / 2000,
+                //           minHeight: 8,
+                //           backgroundColor: Colors.grey[200],
+                //           valueColor: AlwaysStoppedAnimation<Color>(
+                //             Color(0xFF1E88E5),
+                //           ),
+                //         ),
+                //       ),
+                //       SizedBox(height: 16),
+                //       Row(
+                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //         children: [
+                //           Text(
+                //             'Burned:',
+                //             style: TextStyle(
+                //               fontSize: 15,
+                //               color: Colors.grey[700],
+                //               fontWeight: FontWeight.w500,
+                //             ),
+                //           ),
+                //           Text(
+                //             '350kcal',
+                //             style: TextStyle(
+                //               fontSize: 15,
+                //               color: Colors.grey[700],
+                //               fontWeight: FontWeight.w600,
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                Consumer2<MealLogProvider, HomeProvider>(
+                  builder: (context, mealProvider, homeProvider, _) {
+                    final log = mealProvider.todayLog;
+                    final consumed = log?.totals.calories.toInt() ?? 0;
+                    final goal = log?.goals.calories.toInt() ?? 2000;
+                    final burned = homeProvider.caloriesBurned;
+                    final net = consumed - burned;
+                    final protein = log?.totals.protein.toInt() ?? 0;
+                    final proteinGoal = log?.goals.protein.toInt() ?? 150;
 
+                    return Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "TODAY'S PROGRESS",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E88E5),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // calories row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Calories',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '$consumed / ${goal}kcal',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: goal > 0
+                                  ? (consumed / goal).clamp(0.0, 1.0)
+                                  : 0,
+                              minHeight: 7,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF1E88E5),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // protein row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Protein',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '${protein}g / ${proteinGoal}g',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: proteinGoal > 0
+                                  ? (protein / proteinGoal).clamp(0.0, 1.0)
+                                  : 0,
+                              minHeight: 7,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF1E88E5),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 14),
+                          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                          const SizedBox(height: 14),
+
+                          // burned + net row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Burned',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${burned}kcal',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 1,
+                                height: 32,
+                                color: const Color(0xFFF0F0F0),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'Net',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${net}kcal',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: net < 0
+                                            ? Colors.green[600]
+                                            : Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 SizedBox(height: 20),
               ],
             ),

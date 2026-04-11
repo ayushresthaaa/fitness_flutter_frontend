@@ -52,16 +52,13 @@ class _FrequencyChartState extends State<FrequencyChart> {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           _isWeekly ? _buildWeeklyView() : _buildMonthlyChart(),
         ],
       ),
     );
   }
 
-  // Weekly — circles with workout count per day
   Widget _buildWeeklyView() {
     final data = widget.weeklyData;
 
@@ -81,7 +78,6 @@ class _FrequencyChartState extends State<FrequencyChart> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: data.map((day) {
         final hasWorkout = day.workouts > 0;
-
         return Expanded(
           child: Column(
             children: [
@@ -119,7 +115,6 @@ class _FrequencyChartState extends State<FrequencyChart> {
     );
   }
 
-  // Monthly — bar chart
   Widget _buildMonthlyChart() {
     final data = widget.monthlyData;
 
@@ -137,15 +132,35 @@ class _FrequencyChartState extends State<FrequencyChart> {
 
     final maxY =
         data.map((d) => d.workouts.toDouble()).reduce((a, b) => a > b ? a : b) +
-        1;
+        2;
 
     return SizedBox(
-      height: 140,
+      height: 160,
       child: BarChart(
         BarChartData(
           maxY: maxY,
           gridData: const FlGridData(show: false),
           borderData: FlBorderData(show: false),
+          barTouchData: BarTouchData(
+            enabled: false,
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipColor: (_) => Colors.transparent,
+              tooltipPadding: EdgeInsets.zero,
+              tooltipMargin: 6,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                final count = data[groupIndex].workouts;
+                if (count == 0) return null;
+                return BarTooltipItem(
+                  '$count',
+                  const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: kTextDark,
+                  ),
+                );
+              },
+            ),
+          ),
           titlesData: FlTitlesData(
             topTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
@@ -179,6 +194,7 @@ class _FrequencyChartState extends State<FrequencyChart> {
             final hasWorkout = data[i].workouts > 0;
             return BarChartGroupData(
               x: i,
+              showingTooltipIndicators: hasWorkout ? [0] : [],
               barRods: [
                 BarChartRodData(
                   toY: hasWorkout ? data[i].workouts.toDouble() : 0.3,

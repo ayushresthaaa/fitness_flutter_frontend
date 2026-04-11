@@ -51,6 +51,7 @@ class ApiEndpoints {
   static String workoutExerciseById(String workoutId, String exerciseId) =>
       '/workouts/$workoutId/exercises/$exerciseId'; // PUT, DELETE
 
+  static const String todayWorkoutSummary = '/workouts/today-summary';
   //routine api endpoints
   static const String routines = '/routines'; // POST, GET
 
@@ -116,8 +117,8 @@ class ApiEndpoints {
   static String orderById(String id) => '/orders/$id';
 
   // Payment endpoints
-  static const String initiatePayment = '/payments/initiate';
-  static const String verifyPayment = '/payments/verify';
+  static const String checkoutInitiate = '/payments/checkout';
+  static const String checkoutVerify = '/payments/checkout/verify';
 
   static const String generateRoutine = '/mlv3/generate';
 
@@ -144,4 +145,9 @@ class ApiEndpoints {
 
   static const String mealHistory = '/meal/log/history';
   static String mealLogReview(String date) => '/meal/log/$date/review';
+
+  // Reminder endpoints
+  static const String reminders = '/reminders';
+  static String reminderToggle(String id) => '/reminders/$id/toggle';
+  static String reminderById(String id) => '/reminders/$id';
 }

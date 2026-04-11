@@ -1,11 +1,9 @@
-// lib/screens/meal/meal_insights_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../widgets/common.dart';
-import '../../../providers/meal/meal_insights_provider.dart';
-import '../../../providers/meal/meal_log_provider.dart';
-import '../../../models/meal/meal_insights_model.dart';
+import '../../../../widgets/common.dart';
+import '../../../../providers/meal/meal_insights_provider.dart';
+import '../../../../providers/meal/meal_log_provider.dart';
+import '../../../../models/meal/meal_insights_model.dart';
 import 'widgets/nutrition_score_card.dart';
 import 'widgets/streak_card.dart';
 import 'widgets/macro_hit_rate.dart';
@@ -26,13 +24,9 @@ class _MealInsightsScreenState extends State<MealInsightsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // load insights + history in parallel
       context.read<MealInsightsProvider>().loadInsights();
       context.read<MealInsightsProvider>().loadHistory();
-
-      // today log may already be loaded from meal planner — only load if missing
       final logProvider = context.read<MealLogProvider>();
       if (logProvider.todayLog == null) {
         logProvider.loadTodayLog();
@@ -70,6 +64,7 @@ class _MealInsightsScreenState extends State<MealInsightsScreen>
           labelColor: kPrimary,
           unselectedLabelColor: kTextGrey,
           indicatorColor: kPrimary,
+          indicatorWeight: 2,
           labelStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -87,20 +82,13 @@ class _MealInsightsScreenState extends State<MealInsightsScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _DayTab(),
-          _WeekTab(),
-          _MonthTab(),
-        ],
+        children: const [_DayTab(), _WeekTab(), _MonthTab()],
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────
-// DAY TAB — today's macro breakdown
-// ─────────────────────────────────────────
-
+// day tab shows today's macro and water breakdown
 class _DayTab extends StatelessWidget {
   const _DayTab();
 
@@ -124,84 +112,78 @@ class _DayTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // calories summary card
-        _DaySummaryCard(
+        _MacroCard(
           label: 'Calories',
           consumed: log.totals.calories.toInt(),
           goal: log.goals.calories.toInt(),
           unit: 'kcal',
           progress: log.calorieProgress,
           color: log.isOverCalorieGoal ? kRed : kPrimary,
+          icon: Icons.local_fire_department_outlined,
         ),
-
         const SizedBox(height: 12),
-
-        // macros breakdown
-        _DaySummaryCard(
+        _MacroCard(
           label: 'Protein',
           consumed: log.totals.protein.toInt(),
           goal: log.goals.protein.toInt(),
           unit: 'g',
           progress: log.proteinProgress,
           color: kPrimary,
+          icon: Icons.fitness_center_outlined,
         ),
-
         const SizedBox(height: 12),
-
-        _DaySummaryCard(
+        _MacroCard(
           label: 'Carbs',
           consumed: log.totals.carbs.toInt(),
           goal: log.goals.carbs.toInt(),
           unit: 'g',
           progress: log.carbsProgress,
           color: const Color(0xFFFB8C00),
+          icon: Icons.grain_outlined,
         ),
-
         const SizedBox(height: 12),
-
-        _DaySummaryCard(
+        _MacroCard(
           label: 'Fat',
           consumed: log.totals.fat.toInt(),
           goal: log.goals.fat.toInt(),
           unit: 'g',
           progress: log.fatProgress,
           color: const Color(0xFF8E24AA),
+          icon: Icons.opacity_outlined,
         ),
-
         const SizedBox(height: 12),
-
-        // water intake
-        _DaySummaryCard(
+        _MacroCard(
           label: 'Water',
           consumed: log.hydration.consumed,
           goal: log.hydration.goal,
           unit: 'ml',
           progress: log.hydration.progress,
           color: kPrimary,
+          icon: Icons.water_drop_outlined,
         ),
-
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
       ],
     );
   }
 }
 
-// single macro card for the Day tab
-class _DaySummaryCard extends StatelessWidget {
+class _MacroCard extends StatelessWidget {
   final String label;
   final int consumed;
   final int goal;
   final String unit;
   final double progress;
   final Color color;
+  final IconData icon;
 
-  const _DaySummaryCard({
+  const _MacroCard({
     required this.label,
     required this.consumed,
     required this.goal,
     required this.unit,
     required this.progress,
     required this.color,
+    required this.icon,
   });
 
   @override
@@ -210,7 +192,7 @@ class _DaySummaryCard extends StatelessWidget {
     final isOver = consumed > goal;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: kWhite,
         borderRadius: BorderRadius.circular(12),
@@ -218,13 +200,14 @@ class _DaySummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // label + percentage
           Row(
             children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
               Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: kTextDark,
                 ),
@@ -240,23 +223,17 @@ class _DaySummaryCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 6,
+              minHeight: 5,
               backgroundColor: kDivider,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
-
           const SizedBox(height: 8),
-
-          // consumed / remaining / goal row
           Row(
             children: [
               Text(
@@ -267,7 +244,7 @@ class _DaySummaryCard extends StatelessWidget {
               Text(
                 isOver
                     ? '${remaining.abs()} $unit over'
-                    : '$remaining $unit remaining',
+                    : '$remaining $unit left',
                 style: TextStyle(
                   fontSize: 12,
                   color: isOver ? kRed : kTextGrey,
@@ -281,19 +258,16 @@ class _DaySummaryCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────
-// WEEK TAB — score, streak, chart, hit rates, averages
-// ─────────────────────────────────────────
-
+// week tab shows score, streak, chart, hit rates, averages
 class _WeekTab extends StatelessWidget {
   const _WeekTab();
 
   @override
   Widget build(BuildContext context) {
-    final insightsProvider = context.watch<MealInsightsProvider>();
-    final insights = insightsProvider.insights;
+    final provider = context.watch<MealInsightsProvider>();
+    final insights = provider.insights;
 
-    if (insightsProvider.isLoading) {
+    if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator(color: kPrimary));
     }
 
@@ -301,29 +275,33 @@ class _WeekTab extends StatelessWidget {
       return const EmptyState(
         icon: Icons.bar_chart_outlined,
         title: 'No data yet',
-        subtitle: 'Log meals for a few days to see your weekly insights',
+        subtitle: 'Log meals for a few days to see weekly insights',
       );
     }
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        NutritionScoreCard(insights: insights),
-        const SizedBox(height: 12),
-        StreakCard(streak: insights.loggingStreak),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: NutritionScoreCard(insights: insights)),
+            const SizedBox(width: 12),
+            Expanded(child: StreakCard(streak: insights.loggingStreak)),
+          ],
+        ),
         const SizedBox(height: 12),
         WeeklyChart(days: insights.weeklyCalorieChart),
         const SizedBox(height: 12),
         MacroHitRateCard(goalHitRates: insights.goalHitRates),
         const SizedBox(height: 12),
         _WeeklyAveragesCard(averages: insights.weeklyAverages),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
       ],
     );
   }
 }
 
-// weekly averages card — shown at bottom of week tab
 class _WeeklyAveragesCard extends StatelessWidget {
   final WeeklyAverages averages;
 
@@ -332,10 +310,10 @@ class _WeeklyAveragesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: kWhite,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,41 +373,34 @@ class _AvgCell extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: kTextGrey),
-          ),
-          const SizedBox(height: 4),
-          Text(
             value,
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
               color: color,
+              height: 1,
             ),
           ),
-          Text(
-            unit,
-            style: const TextStyle(fontSize: 10, color: kTextGrey),
-          ),
+          const SizedBox(height: 2),
+          Text(unit, style: const TextStyle(fontSize: 10, color: kTextGrey)),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 10, color: kTextGrey)),
         ],
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────
-// MONTH TAB — 30 day history list
-// ─────────────────────────────────────────
-
+// month tab shows 30 day history list
 class _MonthTab extends StatelessWidget {
   const _MonthTab();
 
   @override
   Widget build(BuildContext context) {
-    final insightsProvider = context.watch<MealInsightsProvider>();
-    final history = insightsProvider.history;
+    final provider = context.watch<MealInsightsProvider>();
+    final history = provider.history;
 
-    if (insightsProvider.isLoading) {
+    if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator(color: kPrimary));
     }
 
@@ -445,22 +416,30 @@ class _MonthTab extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: history.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        return _HistoryTile(item: history[index]);
-      },
+      itemBuilder: (_, index) => _HistoryTile(item: history[index]),
     );
   }
 }
 
 class _HistoryTile extends StatelessWidget {
-  final MealHistoryItem item;
+  final InsightsHistoryItem item;
 
   const _HistoryTile({required this.item});
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}';
   }
@@ -477,7 +456,6 @@ class _HistoryTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              // date
               Text(
                 _formatDate(item.date),
                 style: const TextStyle(
@@ -487,31 +465,17 @@ class _HistoryTile extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              // goal hit badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: item.goalHit ? kGreen.withOpacity(0.1) : kRedLight,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  item.goalHit ? 'On Track' : 'Off Track',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: item.goalHit ? kGreen : kRed,
-                  ),
+              Text(
+                item.goalHit ? 'On Track' : 'Off Track',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: item.goalHit ? kPrimary : kTextGrey,
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // calorie progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -523,10 +487,7 @@ class _HistoryTile extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 8),
-
-          // calories + macros row
           Row(
             children: [
               Text(
@@ -535,7 +496,7 @@ class _HistoryTile extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                'P ${item.proteinConsumed.toInt()}g · C ${item.carbsConsumed.toInt()}g · F ${item.fatConsumed.toInt()}g',
+                'P ${item.proteinConsumed.toInt()}g  C ${item.carbsConsumed.toInt()}g  F ${item.fatConsumed.toInt()}g',
                 style: const TextStyle(fontSize: 11, color: kTextHint),
               ),
             ],

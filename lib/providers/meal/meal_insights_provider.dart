@@ -8,10 +8,13 @@ class MealInsightsProvider extends BaseProvider {
   final _service = MealInsightsService();
 
   MealInsights? _insights;
-  List<MealHistoryItem> _history = [];
+  // List<MealHistoryItem> _history = [];
 
   MealInsights? get insights => _insights;
-  List<MealHistoryItem> get history => _history;
+  // List<MealHistoryItem> get history => _history;
+
+  List<InsightsHistoryItem> _history = [];
+  List<InsightsHistoryItem> get history => _history;
 
   Future<void> loadInsights() async {
     await execute(() async {

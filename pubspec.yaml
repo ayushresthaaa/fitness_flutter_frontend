@@ -25,6 +25,8 @@ dependencies:
   image_picker: ^1.2.1
   socket_io_client: ^2.0.3
   khalti_checkout_flutter: ^1.0.0-dev.9
+  flutter_local_notifications: ^18.0.0
+  timezone: ^0.9.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

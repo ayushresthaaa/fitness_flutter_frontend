@@ -7,13 +7,14 @@ import '../../providers/meal/meal_log_provider.dart';
 import '../../providers/meal/nutrition_goal_provider.dart';
 import '../../providers/auth/auth_provider.dart';
 import 'food/food_search_screen.dart';
-import 'insights/meal_insights_screen.dart';
+import 'insights_v2/meal_insights_screenv2.dart';
 import 'report/meal_reports_screen.dart';
 import 'widgets/calorie_card.dart';
 import 'widgets/date_strip.dart';
 import 'widgets/hydration_card.dart';
 import 'widgets/macro_row.dart';
 import 'widgets/meal_slot_card.dart';
+import '../../providers/home/home_provider.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -29,6 +30,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<MealLogProvider>().loadTodayLog();
       context.read<NutritionGoalProvider>().loadGoals();
+      context.read<HomeProvider>().loadTodaySummary();
     });
   }
 
@@ -151,7 +153,12 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CalorieCard(log: log),
+                          Consumer<HomeProvider>(
+                            builder: (context, homeProvider, _) => CalorieCard(
+                              log: log,
+                              burned: homeProvider.caloriesBurned,
+                            ),
+                          ),
                           const SizedBox(height: 12),
                           MacroRow(log: log),
                           const SizedBox(height: 12),

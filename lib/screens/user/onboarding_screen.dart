@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../models/user/user.dart';
 import '../../providers/user/user.provider.dart';
+import '../../providers/meal/nutrition_goal_provider.dart';
 import '../home/home_screen.dart';
+import '../meal/nutrition_goal_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   static const routeName = '/onboarding';
@@ -77,14 +79,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       await context.read<UserProvider>().completeOnboarding(profile: profile);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile Complete! 🎉'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Navigate to home
-        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+        // Check if the user already has a nutrition goal set
+        final goalProvider = context.read<NutritionGoalProvider>();
+        await goalProvider.loadGoals();
+
+        if (!mounted) return;
+
+        if (goalProvider.goal == null) {
+          // No goal yet — send them through the nutrition goal setup step
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const NutritionGoalScreen(isOnboarding: true),
+            ),
+          );
+        } else {
+          // Goal already exists — go straight to home
+          Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -108,12 +120,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header
-                const Text(
-                  '🎯',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 80),
-                ),
+                // // Header
+                // const Text(
+                //   '🎯',
+                //   textAlign: TextAlign.center,
+                //   style: TextStyle(fontSize: 80),
+                // ),
                 const SizedBox(height: 16),
                 Text(
                   'Complete Your Profile',

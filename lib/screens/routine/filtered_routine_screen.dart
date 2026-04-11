@@ -11,8 +11,13 @@ import '../workout/active_workout_screen_v2.dart';
 
 class FilteredRoutineScreen extends StatelessWidget {
   final String filter;
+  final VoidCallback? onWorkoutComplete;
 
-  const FilteredRoutineScreen({super.key, required this.filter});
+  const FilteredRoutineScreen({
+    super.key,
+    required this.filter,
+    this.onWorkoutComplete,
+  });
 
   String _getTitle() {
     if (filter == 'mine') return 'My Routines';
@@ -101,6 +106,7 @@ class FilteredRoutineScreen extends StatelessWidget {
                   },
                 )
                 .toList(),
+            onWorkoutComplete: onWorkoutComplete,
           ),
         ),
       );

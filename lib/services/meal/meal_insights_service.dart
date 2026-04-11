@@ -12,10 +12,12 @@ class MealInsightsService {
     return MealInsights.fromJson(res.data['data']);
   }
 
-  Future<List<MealHistoryItem>> getHistory() async {
-    final res = await _dio.get(ApiEndpoints.mealHistory);
+  Future<List<InsightsHistoryItem>> getHistory() async {
+    final res = await _dio.get(
+      ApiEndpoints.mealInsightHistory,
+    ); // ← /meal/history
     return (res.data['data'] as List)
-        .map((e) => MealHistoryItem.fromJson(e))
+        .map((e) => InsightsHistoryItem.fromJson(e))
         .toList();
   }
 }

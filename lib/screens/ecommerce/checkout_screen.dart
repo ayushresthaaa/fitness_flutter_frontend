@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 import '../../providers/ecommerce/cart_provider.dart';
-import '../../providers/ecommerce/order_provider.dart';
-import '../../models/ecommerce/order_model.dart';
 import '../../services/ecommerce/payment_service.dart';
 import '../../widgets/common.dart';
 import 'order_detail_screen.dart';
@@ -23,10 +21,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final PaymentService _paymentService = PaymentService();
-  double _orderTotal = 0;
-  // Once order is placed we store it here and show the Khalti button
-  Order? _placedOrder;
-  bool _isInitiatingPayment = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -36,7 +31,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.dispose();
   }
 
-  Future<void> _placeOrder() async {
+  Future<void> _startCheckout() async {
     if (_nameController.text.trim().isEmpty ||
         _phoneController.text.trim().isEmpty ||
         _addressController.text.trim().isEmpty) {
@@ -46,40 +41,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    final orderProvider = context.read<OrderProvider>();
-    final cartProvider = context.read<CartProvider>();
-
-    // Save total before clearing cart
-    final orderTotal = cartProvider.total;
-
-    final order = await orderProvider.placeOrder(
-      shippingName: _nameController.text.trim(),
-      shippingPhone: _phoneController.text.trim(),
-      shippingAddress: _addressController.text.trim(),
-    );
-
-    if (order != null && mounted) {
-      await cartProvider.clearCart();
-      setState(() {
-        _placedOrder = order;
-        _orderTotal = orderTotal;
-      });
-    }
-  }
-
-  Future<void> _initiateKhaltiPayment() async {
-    if (_placedOrder == null) return;
-
-    setState(() {
-      _isInitiatingPayment = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final result = await _paymentService.initiatePayment(
-        orderId: _placedOrder!.id,
+      // Initiate checkout — validates cart + stock, stores shipping details,
+      // creates Khalti payment. Order is NOT created yet.
+      final result = await _paymentService.initiateCheckout(
+        shippingName: _nameController.text.trim(),
+        shippingPhone: _phoneController.text.trim(),
+        shippingAddress: _addressController.text.trim(),
       );
 
-      final pidx = result['pidx'];
+      final pidx = result['pidx'] as String;
 
       if (!mounted) return;
 
@@ -95,8 +68,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         onPaymentResult: (paymentResult, khalti) async {
           log('Payment result: $paymentResult');
 
-          // Payment done
-          await _verifyPayment(pidx, khalti);
+          // Verify with backend — order is created atomically here
+          final verified = await _verifyCheckout(pidx, khalti);
+          if (verified == null || verified['status'] != 'completed') {
+            // Retry once after 2 seconds
+            await Future.delayed(const Duration(seconds: 2));
+            final retried = await _verifyCheckout(pidx, khalti);
+            if (retried == null || retried['status'] != 'completed') {
+              khalti.close(context);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Payment verification failed. Your cart is still intact — please try again.',
+                    ),
+                  ),
+                );
+              }
+            }
+          }
         },
         onMessage:
             (
@@ -108,10 +98,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             }) async {
               log('Khalti message: $description');
 
-              // If payment confirmation is needed, verify with backend
               if (needsPaymentConfirmation == true) {
-                await _verifyPayment(pidx, khalti);
+                final result = await _verifyCheckout(pidx, khalti);
+                if (result == null || result['status'] != 'completed') {
+                  // Verification failed — nothing was created, cart is intact
+                  khalti.close(context);
+                }
               } else {
+                // User closed Khalti without paying — nothing to clean up
                 khalti.close(context);
               }
             },
@@ -126,54 +120,51 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to initiate payment: $error')),
+          SnackBar(content: Text('Checkout failed: $error')),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isInitiatingPayment = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  //Verify payment with our backend after Khalti confirms
-  Future<void> _verifyPayment(String pidx, Khalti khalti) async {
+  // Verifies payment with backend.
+  // On success: order is created, cart is cleared, Khalti is closed, navigates to order detail.
+  // On failure: returns result (or null on error) so caller can handle messaging.
+  Future<Map<String, dynamic>?> _verifyCheckout(
+    String pidx,
+    Khalti khalti,
+  ) async {
     try {
-      final result = await _paymentService.verifyPayment(pidx: pidx);
-      khalti.close(context);
-
-      if (!mounted) return;
+      final result = await _paymentService.verifyCheckout(pidx: pidx);
 
       if (result['status'] == 'completed') {
-        // Payment successful
+        khalti.close(context);
+        if (!mounted) return result;
+
+        // Refresh local cart state since backend cleared it atomically
+        await context.read<CartProvider>().fetchCart();
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => OrderDetailScreen(orderId: _placedOrder!.id),
+            builder: (context) =>
+                OrderDetailScreen(orderId: result['orderId'] as String),
           ),
           (route) => route.settings.name == '/shop' || route.isFirst,
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment failed. Please try again.')),
-        );
       }
-    } catch (error) {
-      khalti.close(context);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment verification failed: $error')),
-        );
-      }
+
+      return result;
+    } catch (_) {
+      return null;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
-    final orderProvider = context.watch<OrderProvider>();
+    final total = cartProvider.total;
 
     return Scaffold(
       backgroundColor: kBackground,
@@ -239,7 +230,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                       Text(
-                        'Rs. ${_placedOrder != null ? _orderTotal.toStringAsFixed(0) : cartProvider.total.toStringAsFixed(0)}',
+                        'Rs. ${total.toStringAsFixed(0)}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -255,110 +246,80 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 16),
 
             // Shipping details card
-            if (_placedOrder == null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SectionLabel('Shipping Details'),
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'Full Name',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: kTextDark,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    AppTextField(
-                      controller: _nameController,
-                      hint: 'e.g. Aayush Shrestha',
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'Phone Number',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: kTextDark,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    AppTextField(
-                      controller: _phoneController,
-                      hint: 'e.g. 9801234567',
-                      keyboardType: TextInputType.phone,
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    const Text(
-                      'Delivery Address',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: kTextDark,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    AppTextField(
-                      controller: _addressController,
-                      hint: 'e.g. Kathmandu, Baneshwor',
-                      maxLines: 3,
-                    ),
-                  ],
-                ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kWhite,
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SectionLabel('Shipping Details'),
+                  const SizedBox(height: 12),
 
-            // Order placed confirmation
-            if (_placedOrder != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: kGreen, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Order #${_placedOrder!.id.substring(_placedOrder!.id.length - 6).toUpperCase()} placed. Complete payment to confirm.',
-                        style: const TextStyle(fontSize: 13, color: kTextDark),
-                      ),
+                  const Text(
+                    'Full Name',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: kTextDark,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 6),
+                  AppTextField(
+                    controller: _nameController,
+                    hint: 'e.g. Aayush Shrestha',
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    'Phone Number',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: kTextDark,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  AppTextField(
+                    controller: _phoneController,
+                    hint: 'e.g. 9801234567',
+                    keyboardType: TextInputType.phone,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    'Delivery Address',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: kTextDark,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  AppTextField(
+                    controller: _addressController,
+                    hint: 'e.g. Kathmandu, Baneshwor',
+                    maxLines: 3,
+                  ),
+                ],
               ),
+            ),
 
             const SizedBox(height: 100),
           ],
         ),
       ),
 
-      // Bottom bar — shows Place Order or Pay with Khalti depending on state
       bottomNavigationBar: BottomBar(
-        child: _placedOrder == null
-            ? PrimaryButton(
-                text: 'Place Order',
-                isLoading: orderProvider.isLoading,
-                onTap: _placeOrder,
-              )
-            : PrimaryButton(
-                text: 'Pay with Khalti',
-                isLoading: _isInitiatingPayment,
-                onTap: _initiateKhaltiPayment,
-              ),
+        child: PrimaryButton(
+          text: 'Pay Rs. ${total.toStringAsFixed(0)} with Khalti',
+          isLoading: _isLoading,
+          onTap: _startCheckout,
+        ),
       ),
     );
   }

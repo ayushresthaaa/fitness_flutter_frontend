@@ -11,6 +11,7 @@ import 'v2/widgets/exercise_set_card_v2.dart';
 import 'v2/widgets/rest_timer_banner_v2.dart';
 import 'v2/widgets/workout_timer_v2.dart';
 import 'v2/widgets/superset_card_v2.dart';
+import 'v2/widgets/rpe_picker.dart';
 
 // Active workout screen
 // Everything is local until user taps Finish
@@ -22,12 +23,14 @@ class ActiveWorkoutScreenV2 extends StatefulWidget {
   final String? workoutTitle;
   final String? routineId; // add
   final List<Map<String, dynamic>>? originalExercises;
+  final VoidCallback? onWorkoutComplete;
   const ActiveWorkoutScreenV2({
     super.key,
     this.prefilledExercises,
     this.workoutTitle,
     this.routineId, // add
     this.originalExercises,
+    this.onWorkoutComplete,
   });
 
   @override
@@ -199,14 +202,27 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
       isPR = set.weightKg! > lastWeight;
     }
 
+    final isNowComplete = !set.isCompleted; // ← move outside setState
+
     setState(() {
-      final isNowComplete = !set.isCompleted;
       _exerciseSets[localId]![index] = set.copyWith(
         isCompleted: isNowComplete,
         isPR: isNowComplete ? isPR : false,
       );
       if (isNowComplete) _showRestTimer = true;
     });
+
+    if (isNowComplete && !isCardio) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showRpePicker(
+          context: context,
+          set: _exerciseSets[localId]![index],
+          onChanged: (updated) {
+            setState(() => _exerciseSets[localId]![index] = updated);
+          },
+        );
+      });
+    }
   }
 
   // Discard just pop, nothing was saved to backend
@@ -229,7 +245,18 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
   }
 
   void _goToFinish() {
-    // Check if there are any completed sets at all
+    final durationMins = DateTime.now().difference(_startTime).inMinutes;
+    if (durationMins < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Workout must be at least 1 minute long'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // existing check
     final hasCompletedSets = _exerciseSets.values.any(
       (sets) => sets.any((s) => s.isCompleted),
     );
@@ -266,6 +293,7 @@ class _ActiveWorkoutScreenV2State extends State<ActiveWorkoutScreenV2> {
           routineId: widget.routineId,
           originalExercises: widget.originalExercises,
           workoutTitle: widget.workoutTitle,
+          onWorkoutComplete: widget.onWorkoutComplete,
         ),
       ),
     );

@@ -1,10 +1,11 @@
 import '../../services/exercise/workout_service.dart';
 import '../../models/exercise/workout_model.dart';
 import '../base/base_provider.dart';
+import '../../api/api_client.dart';
 
 class WorkoutProvider extends BaseProvider {
   final WorkoutService _service = WorkoutService();
-
+  final _dio = ApiClient().dio;
   List<Workout> _workouts = [];
   Workout? _currentWorkout; // Active workout being performed
 
@@ -174,6 +175,22 @@ class WorkoutProvider extends BaseProvider {
     if (result != null) {
       // Refresh current workout
       await fetchWorkoutById(_currentWorkout!.id);
+    }
+  }
+
+  Future<void> updateWorkoutStartTime(
+    String workoutId,
+    DateTime startTime,
+  ) async {
+    try {
+      print('Updating startTime to: ${startTime.toUtc().toIso8601String()}');
+      final res = await _dio.patch(
+        '/workouts/$workoutId/start-time',
+        data: {'startTime': startTime.toUtc().toIso8601String()},
+      );
+      print('Response: ${res.data}');
+    } catch (e) {
+      print('Error updating startTime: $e');
     }
   }
 

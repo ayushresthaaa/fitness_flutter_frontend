@@ -182,7 +182,7 @@ class MealInsights {
 // MEAL HISTORY ITEM
 // ─────────────────────────────────────────
 
-class MealHistoryItem {
+class InsightsHistoryItem {
   final DateTime date;
   final double calorieGoal;
   final double caloriesConsumed;
@@ -194,7 +194,7 @@ class MealHistoryItem {
   final double fatConsumed;
   final bool goalHit;
 
-  MealHistoryItem({
+  InsightsHistoryItem({
     required this.date,
     required this.calorieGoal,
     required this.caloriesConsumed,
@@ -207,10 +207,10 @@ class MealHistoryItem {
     required this.goalHit,
   });
 
-  factory MealHistoryItem.fromJson(Map<String, dynamic> json) {
+  factory InsightsHistoryItem.fromJson(Map<String, dynamic> json) {
     final goals = json['goals'] as Map<String, dynamic>;
     final totals = json['totals'] as Map<String, dynamic>;
-    return MealHistoryItem(
+    return InsightsHistoryItem(
       date: DateTime.parse(json['date']).toLocal(),
       calorieGoal: (goals['calories'] as num).toDouble(),
       caloriesConsumed: (totals['calories'] as num).toDouble(),

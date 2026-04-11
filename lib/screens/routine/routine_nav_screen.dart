@@ -7,7 +7,9 @@ import 'filtered_routine_screen.dart';
 
 // Entry point for the Routines section
 class RoutineNavScreen extends StatefulWidget {
-  const RoutineNavScreen({super.key});
+  final VoidCallback? onWorkoutComplete;
+
+  const RoutineNavScreen({super.key, this.onWorkoutComplete});
 
   @override
   State<RoutineNavScreen> createState() => _RoutineNavScreenState();
@@ -40,7 +42,12 @@ class _RoutineNavScreenState extends State<RoutineNavScreen> {
   void _openFilter(String filter) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => FilteredRoutineScreen(filter: filter)),
+      MaterialPageRoute(
+        builder: (_) => FilteredRoutineScreen(
+          filter: filter,
+          onWorkoutComplete: widget.onWorkoutComplete,
+        ),
+      ),
     );
   }
 

@@ -23,6 +23,9 @@ import './providers/meal/meal_log_provider.dart';
 import './providers/meal/meal_insights_provider.dart';
 import './providers/meal/nutrition_goal_provider.dart';
 import './providers/trainer/trainer_request_provider.dart';
+import './providers/home/home_provider.dart';
+import './providers/reminders/reminders_provider.dart';
+import './services/notification/notification_schedular.dart';
 // Import your routes
 import 'routes/app_routes.dart';
 
@@ -37,7 +40,7 @@ void main() async {
 
   // Initialize the API client
   ApiClient().initialize();
-
+  await initNotifications();
   // Run the app
   runApp(MyApp());
 }
@@ -95,6 +98,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<TrainerRequestProvider>(
           create: (_) => TrainerRequestProvider(),
+        ),
+        ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
+        ChangeNotifierProvider<ReminderProvider>(
+          create: (_) => ReminderProvider(),
         ),
       ],
       builder: (context, child) {

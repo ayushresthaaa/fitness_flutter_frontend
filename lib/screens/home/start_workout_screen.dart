@@ -6,7 +6,9 @@ import '../../screens/routine/routine_nav_screen.dart';
 // Entry screen for starting a workout
 // Two options - start from a routine or start a quick empty workout
 class StartWorkoutScreen extends StatelessWidget {
-  const StartWorkoutScreen({super.key});
+  final VoidCallback? onWorkoutComplete;
+
+  const StartWorkoutScreen({super.key, this.onWorkoutComplete});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,11 @@ class StartWorkoutScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const RoutineNavScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => RoutineNavScreen(
+                        onWorkoutComplete: onWorkoutComplete,
+                      ),
+                    ),
                   );
                 },
                 child: Container(
@@ -75,7 +81,9 @@ class StartWorkoutScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const ActiveWorkoutScreenV2(),
+                      builder: (_) => ActiveWorkoutScreenV2(
+                        onWorkoutComplete: onWorkoutComplete,
+                      ),
                     ),
                   );
                 },

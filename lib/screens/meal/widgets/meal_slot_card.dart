@@ -22,7 +22,7 @@ class MealSlotCard extends StatelessWidget {
       case 'breakfast':
         return Icons.wb_sunny_outlined;
       case 'lunch':
-        return Icons.light_mode_outlined;
+        return Icons.lunch_dining_outlined;
       case 'dinner':
         return Icons.nights_stay_outlined;
       case 'snack':

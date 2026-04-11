@@ -7,16 +7,24 @@ import '../../../models/meal/meal_log_model.dart';
 
 class CalorieCard extends StatelessWidget {
   final MealLog log;
+  final int burned; // ← add
 
-  const CalorieCard({super.key, required this.log});
+  const CalorieCard({
+    super.key,
+    required this.log,
+    this.burned = 0, // ← default 0
+  });
 
   @override
   Widget build(BuildContext context) {
     final consumed = log.totals.calories.toInt();
     final goal = log.goals.calories.toInt();
-    final remaining = log.caloriesRemaining.toInt();
-    final isOver = log.isOverCalorieGoal;
-    final progress = log.calorieProgress;
+    final adjustedGoal = goal + burned; // ← real budget
+    final remaining = adjustedGoal - consumed;
+    final isOver = consumed > adjustedGoal;
+    final progress = adjustedGoal > 0
+        ? (consumed / adjustedGoal).clamp(0.0, 1.0)
+        : 0.0;
 
     return Container(
       width: double.infinity,
@@ -27,14 +35,12 @@ class CalorieCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // circular progress meter
           SizedBox(
             width: 100,
             height: 100,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // ring painter
                 CustomPaint(
                   size: const Size(100, 100),
                   painter: _RingPainter(
@@ -43,12 +49,11 @@ class CalorieCard extends StatelessWidget {
                     backgroundColor: kDivider,
                   ),
                 ),
-                // center text
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      isOver ? '+${(consumed - goal)}' : '${remaining}',
+                      isOver ? '+${consumed - adjustedGoal}' : '$remaining',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -67,7 +72,6 @@ class CalorieCard extends StatelessWidget {
 
           const SizedBox(width: 20),
 
-          // eaten / goal / burned labels
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,17 +81,25 @@ class CalorieCard extends StatelessWidget {
                   value: '$consumed kcal',
                   valueColor: kTextDark,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 _StatRow(
                   label: 'Goal',
                   value: '$goal kcal',
                   valueColor: kTextGrey,
                 ),
-                const SizedBox(height: 10),
+                if (burned > 0) ...[
+                  const SizedBox(height: 8),
+                  _StatRow(
+                    label: 'Burned',
+                    value: '+$burned kcal',
+                    valueColor: const Color(0xFFFF9800),
+                  ),
+                ],
+                const SizedBox(height: 8),
                 _StatRow(
                   label: 'Remaining',
                   value: isOver
-                      ? '${remaining.abs()} kcal over'
+                      ? '${(consumed - adjustedGoal).abs()} kcal over'
                       : '$remaining kcal',
                   valueColor: isOver ? kRed : kGreen,
                 ),

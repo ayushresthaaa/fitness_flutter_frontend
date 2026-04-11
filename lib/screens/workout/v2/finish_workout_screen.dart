@@ -14,6 +14,7 @@ class FinishWorkoutScreenV2 extends StatefulWidget {
   final String? routineId;
   final List<Map<String, dynamic>>? originalExercises; // {exerciseId, name}
   final String? workoutTitle;
+  final VoidCallback? onWorkoutComplete;
 
   const FinishWorkoutScreenV2({
     super.key,
@@ -24,6 +25,7 @@ class FinishWorkoutScreenV2 extends StatefulWidget {
     this.routineId,
     this.originalExercises,
     this.workoutTitle,
+    this.onWorkoutComplete,
   });
 
   @override
@@ -62,6 +64,14 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
 
     if (provider.currentWorkout == null) return;
 
+    print('startTime to update: ${widget.startTime}');
+    await provider.updateWorkoutStartTime(
+      provider.currentWorkout!.id,
+      widget.startTime,
+    );
+    print('startTime updated');
+
+    
     final Map<String, String> localIdToWorkoutExerciseId = {};
 
     for (final item in widget.exercises) {
@@ -241,7 +251,10 @@ class _FinishWorkoutScreenV2State extends State<FinishWorkoutScreenV2> {
   }
 
   void _popAndNotify(String message) {
+    print('_popAndNotify called, onWorkoutComplete: ${widget.onWorkoutComplete}');
     Navigator.popUntil(context, (route) => route.isFirst);
+    widget.onWorkoutComplete?.call();
+    print('onWorkoutComplete called');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

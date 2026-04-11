@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../screens/home/home_screen.dart';
 import '../../screens/user/onboarding_screen.dart';
+import '../../screens/meal/nutrition_goal_screen.dart';
 import '../../guards/auth_guard.dart';
 import '../../guards/onboarding_guard.dart';
-// import '../../screens/home/home_screen.dart';
 
 Map<String, WidgetBuilder> pageRoutes = {
   HomeScreen.routeName: (context) => AuthGuard(
@@ -12,4 +12,7 @@ Map<String, WidgetBuilder> pageRoutes = {
   OnboardingScreen.routeName: (context) => AuthGuard(
     child: OnboardingScreen(),
   ), //onboarding only requires the auth guard
+  NutritionGoalScreen.routeName: (context) => AuthGuard(
+    child: NutritionGoalScreen(isOnboarding: false),
+  ), //used from profile/settings; isOnboarding can be overridden via Navigator.push
 };

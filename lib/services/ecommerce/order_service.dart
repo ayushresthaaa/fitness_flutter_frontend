@@ -42,4 +42,5 @@ class OrderService {
     final response = await _dio.get(ApiEndpoints.orderById(id));
     return Order.fromJson(response.data['data']);
   }
+
 }
