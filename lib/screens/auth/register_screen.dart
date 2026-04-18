@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
-
+import 'verify_otp_screen.dart';
 class RegisterScreen extends StatefulWidget {
   static const routeName = '/register';
 
@@ -34,14 +34,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
 
-    // Only redirect to /login after email registration, not Google OAuth.
-    if (_registeredWithEmail && authProvider.user != null && authProvider.error == null && !authProvider.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
-        }
-      });
-    }
+    // // Only redirect to /login after email registration, not Google OAuth.
+    // if (_registeredWithEmail &&
+    //     authProvider.user != null &&
+    //     authProvider.error == null &&
+    //     !authProvider.isLoading) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     if (mounted) {
+    //       Navigator.pushReplacementNamed(context, '/login');
+    //     }
+    //   });
+    // }
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -218,14 +221,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: ElevatedButton(
                     onPressed: authProvider.isLoading
                         ? null
-                        : () {
-                            setState(() => _registeredWithEmail = true);
-                            authProvider.register(
+                        : () async {
+                            final email = await authProvider.register(
                               _emailController.text.trim(),
                               _passwordController.text,
                               _confirmPasswordController.text,
                               _nameController.text.trim(),
                             );
+
+                            if (email != null && mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VerifyOtpScreen(
+                                    email: email,
+                                    isRegistration: true,
+                                  ),
+                                ),
+                              );
+                            }
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[700],

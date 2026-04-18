@@ -15,6 +15,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _newController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
   bool _isSaving = false;
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -41,16 +44,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       return;
     }
 
-    if (_newController.text.trim().length < 6) {
+    if (_newController.text.trim().length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password must be at least 6 characters')),
+        const SnackBar(content: Text('Password must be at least 8 characters')),
       );
       return;
     }
 
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
     try {
       await context.read<UserProvider>().changePassword(
@@ -71,11 +72,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ).showSnackBar(SnackBar(content: Text('Failed: $e')));
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -89,56 +86,94 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Current password
-            const Text(
-              'Current Password',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: kTextDark,
+            const SizedBox(height: 8),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: kWhite,
+                borderRadius: BorderRadius.circular(12),
               ),
-            ),
-            const SizedBox(height: 6),
-            AppTextField(
-              controller: _currentController,
-              hint: 'Enter current password',
-              obscureText: true,
-            ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SectionLabel('Current Password'),
+                  const SizedBox(height: 8),
+                  Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      AppTextField(
+                        controller: _currentController,
+                        hint: 'Enter current password',
+                        obscureText: _obscureCurrent,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _obscureCurrent
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: kTextGrey,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureCurrent = !_obscureCurrent),
+                      ),
+                    ],
+                  ),
 
-            const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-            // New password
-            const Text(
-              'New Password',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: kTextDark,
+                  const SectionLabel('New Password'),
+                  const SizedBox(height: 8),
+                  Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      AppTextField(
+                        controller: _newController,
+                        hint: 'At least 8 characters',
+                        obscureText: _obscureNew,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _obscureNew
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: kTextGrey,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureNew = !_obscureNew),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const SectionLabel('Confirm New Password'),
+                  const SizedBox(height: 8),
+                  Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      AppTextField(
+                        controller: _confirmController,
+                        hint: 'Repeat your new password',
+                        obscureText: _obscureConfirm,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: kTextGrey,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscureConfirm = !_obscureConfirm),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 6),
-            AppTextField(
-              controller: _newController,
-              hint: 'Enter new password',
-              obscureText: true,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Confirm new password
-            const Text(
-              'Confirm New Password',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: kTextDark,
-              ),
-            ),
-            const SizedBox(height: 6),
-            AppTextField(
-              controller: _confirmController,
-              hint: 'Re-enter new password',
-              obscureText: true,
             ),
 
             const SizedBox(height: 100),
@@ -149,7 +184,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: PrimaryButton(
           text: 'Change Password',
           isLoading: _isSaving,
-          onTap: _save,
+          onTap: _isSaving ? null : _save,
         ),
       ),
     );

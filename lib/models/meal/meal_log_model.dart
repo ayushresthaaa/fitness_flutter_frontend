@@ -219,6 +219,9 @@ class MealLog {
   final DateTime date;
   final String? reviewStatus;
   final String? trainerNotes;
+  final String? proteinFeedback;
+  final String? caloriesFeedback;
+  final String? overallFeedback;
   final MacroTotals goals;
   final MacroTotals totals;
   final MacroTotals remaining;
@@ -230,6 +233,9 @@ class MealLog {
     required this.date,
     this.reviewStatus,
     this.trainerNotes,
+    this.proteinFeedback,
+    this.caloriesFeedback,
+    this.overallFeedback,
     required this.goals,
     required this.totals,
     required this.remaining,
@@ -243,6 +249,9 @@ class MealLog {
       date: DateTime.parse(json['date']).toLocal(),
       reviewStatus: json['reviewStatus'],
       trainerNotes: json['trainerNotes'],
+      proteinFeedback: json['proteinFeedback'],
+      caloriesFeedback: json['caloriesFeedback'],
+      overallFeedback: json['overallFeedback'],
       goals: MacroTotals.fromJson(json['goals']),
       totals: MacroTotals.fromJson(json['totals']),
       remaining: MacroTotals.fromJson(json['remaining']),
@@ -261,6 +270,9 @@ class MealLog {
       'date': date.toIso8601String(),
       'reviewStatus': reviewStatus,
       'trainerNotes': trainerNotes,
+      'proteinFeedback': proteinFeedback,
+      'caloriesFeedback': caloriesFeedback,
+      'overallFeedback': overallFeedback,
       'goals': goals.toJson(),
       'totals': totals.toJson(),
       'remaining': remaining.toJson(),
@@ -269,7 +281,6 @@ class MealLog {
     };
   }
 
-  // progress ratios for rings/bars — clamped 0.0–1.0
   double get calorieProgress => goals.calories > 0
       ? (totals.calories / goals.calories).clamp(0.0, 1.0)
       : 0;
@@ -283,7 +294,6 @@ class MealLog {
   bool get isOverCalorieGoal => totals.calories > goals.calories;
   double get caloriesRemaining => goals.calories - totals.calories;
 
-  // slot quick access
   MealSlot? get breakfast =>
       slots.where((s) => s.type == 'breakfast').firstOrNull;
   MealSlot? get lunch => slots.where((s) => s.type == 'lunch').firstOrNull;
@@ -291,11 +301,18 @@ class MealLog {
   MealSlot? get snack => slots.where((s) => s.type == 'snack').firstOrNull;
 }
 
+// ─────────────────────────────────────────
+// MEAL HISTORY ITEM
+// ─────────────────────────────────────────
+
 class MealHistoryItem {
   final String id;
   final DateTime date;
   final String? reviewStatus;
   final String? trainerNotes;
+  final String? proteinFeedback;
+  final String? caloriesFeedback;
+  final String? overallFeedback;
   final MacroTotals goals;
   final MacroTotals totals;
   final bool goalHit;
@@ -305,6 +322,9 @@ class MealHistoryItem {
     required this.date,
     this.reviewStatus,
     this.trainerNotes,
+    this.proteinFeedback,
+    this.caloriesFeedback,
+    this.overallFeedback,
     required this.goals,
     required this.totals,
     required this.goalHit,
@@ -316,6 +336,9 @@ class MealHistoryItem {
       date: DateTime.parse(json['date']).toLocal(),
       reviewStatus: json['reviewStatus'],
       trainerNotes: json['trainerNotes'],
+      proteinFeedback: json['proteinFeedback'],
+      caloriesFeedback: json['caloriesFeedback'],
+      overallFeedback: json['overallFeedback'],
       goals: MacroTotals.fromJson(json['goals']),
       totals: MacroTotals.fromJson(json['totals']),
       goalHit: json['goalHit'] ?? false,
@@ -326,6 +349,7 @@ class MealHistoryItem {
   bool get isReviewed => reviewStatus == 'reviewed';
   bool get notSent => reviewStatus == null;
   bool get isOverCalorieGoal => totals.calories > goals.calories;
+
   String get dateLabel {
     final now = DateTime.now();
     final diff = now.difference(date).inDays;

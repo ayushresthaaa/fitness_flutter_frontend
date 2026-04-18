@@ -4,6 +4,7 @@ import '../../providers/auth/auth_provider.dart';
 import 'register_screen.dart';
 import '../home/home_screen.dart';
 import '../../providers/user/user.provider.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -139,7 +140,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
 
                 const SizedBox(height: 24),
+                // Forgot password link
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen(),
+                      ),
+                    ),
+                    child: Text(
+                      'Forgot password?',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue[700],
+                      ),
+                    ),
+                  ),
+                ),
 
+                const SizedBox(height: 8),
                 // Login Button
                 SizedBox(
                   width: double.infinity,

@@ -63,38 +63,33 @@ class AuthProvider extends ChangeNotifier {
     _connectSocket(); // add this line
   }
 
-  /// Register with validation
-  Future<void> register(
+  Future<String?> register(
     String email,
     String password,
     String confirmPassword,
     String name,
   ) async {
-    // Validate name
     final nameError = Validators.name(name);
     if (nameError != null) {
       _error = nameError;
       notifyListeners();
-      return;
+      return null;
     }
 
-    // Validate email
     final emailError = Validators.email(email);
     if (emailError != null) {
       _error = emailError;
       notifyListeners();
-      return;
+      return null;
     }
 
-    // Validate password
     final passwordError = Validators.password(password);
     if (passwordError != null) {
       _error = passwordError;
       notifyListeners();
-      return;
+      return null;
     }
 
-    // Validate confirm password
     final confirmPasswordError = Validators.confirmPassword(
       confirmPassword,
       password,
@@ -102,7 +97,7 @@ class AuthProvider extends ChangeNotifier {
     if (confirmPasswordError != null) {
       _error = confirmPasswordError;
       notifyListeners();
-      return;
+      return null;
     }
 
     _isLoading = true;
@@ -110,13 +105,20 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _user = await _authService.register(email, password, name);
+      final registeredEmail = await _authService.register(
+        email,
+        password,
+        name,
+      );
+      _isLoading = false;
+      notifyListeners();
+      return registeredEmail; // return email to screen for navigation
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return null;
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   /// Login with Google OAuth

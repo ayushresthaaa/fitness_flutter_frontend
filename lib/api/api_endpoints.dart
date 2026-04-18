@@ -24,6 +24,7 @@ class ApiEndpoints {
   static const String updateAccount = '/users/me';
   static const String updateProfile = '/users/me/profile';
   static const String changePassword = '/users/me/password';
+
   //exercises enpoints
   // Meta (no auth required)
   static const String exerciseMuscles = '/exercises/meta/muscles'; // GET
@@ -156,4 +157,13 @@ class ApiEndpoints {
   static const String reminders = '/reminders';
   static String reminderToggle(String id) => '/reminders/$id/toggle';
   static String reminderById(String id) => '/reminders/$id';
+
+  // Forgot password
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String verifyOtp = '/auth/verify-otp';
+  static const String resetPassword = '/auth/reset-password';
+
+  //otp stuff 
+  static const String verifyEmail = '/auth/verify-email';
+static const String resendOtp = '/auth/resend-otp';
 }

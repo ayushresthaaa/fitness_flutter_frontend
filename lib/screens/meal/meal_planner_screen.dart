@@ -15,6 +15,7 @@ import 'widgets/hydration_card.dart';
 import 'widgets/macro_row.dart';
 import 'widgets/meal_slot_card.dart';
 import '../../providers/home/home_provider.dart';
+import '../../models/meal/meal_log_model.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -205,26 +206,57 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     );
   }
 }
-
-// ─────────────────────────────────────────
-// REVIEW STATUS WIDGET
-// shown at bottom of past day logs for pro users
-// ─────────────────────────────────────────
+// Replace _ReviewStatusWidget in meal_planner_screen.dart with this
 
 class _ReviewStatusWidget extends StatelessWidget {
-  final dynamic log;
+  final MealLog log;
   final VoidCallback onSend;
 
   const _ReviewStatusWidget({required this.log, required this.onSend});
 
+  String _feedbackLabel(String? value) {
+    switch (value) {
+      case 'too_low':
+        return 'Too Low';
+      case 'on_track':
+        return 'On Track';
+      case 'too_high':
+        return 'Too High';
+      case 'needs_work':
+        return 'Needs Work';
+      case 'good':
+        return 'Good';
+      case 'excellent':
+        return 'Excellent';
+      default:
+        return '—';
+    }
+  }
+
+  Color _feedbackColor(String? value) {
+    switch (value) {
+      case 'on_track':
+      case 'good':
+      case 'excellent':
+        return kGreen;
+      case 'too_low':
+      case 'needs_work':
+        return kRed;
+      case 'too_high':
+        return const Color(0xFFF57C00);
+      default:
+        return kTextGrey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // already reviewed — show trainer notes
+    // reviewed — show structured feedback + notes
     if (log.reviewStatus == 'reviewed') {
       return Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kPrimaryLight,
+          color: kWhite,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -232,22 +264,54 @@ class _ReviewStatusWidget extends StatelessWidget {
           children: [
             Row(
               children: const [
-                Icon(Icons.check_circle_outline, size: 16, color: kPrimary),
+                Icon(Icons.check_circle_outline, size: 16, color: kGreen),
                 SizedBox(width: 6),
                 Text(
                   'Reviewed by Trainer',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: kPrimary,
+                    color: kGreen,
                   ),
                 ),
               ],
             ),
-            if (log.trainerNotes != null) ...[
+
+            // structured feedback
+            if (log.proteinFeedback != null ||
+                log.caloriesFeedback != null ||
+                log.overallFeedback != null) ...[
+              const SizedBox(height: 14),
+              const Divider(color: kDivider, height: 1),
+              const SizedBox(height: 12),
+              const SectionLabel('Feedback'),
+              const SizedBox(height: 10),
+              _FeedbackRow(
+                label: 'Protein',
+                value: _feedbackLabel(log.proteinFeedback),
+                color: _feedbackColor(log.proteinFeedback),
+              ),
               const SizedBox(height: 8),
+              _FeedbackRow(
+                label: 'Calories',
+                value: _feedbackLabel(log.caloriesFeedback),
+                color: _feedbackColor(log.caloriesFeedback),
+              ),
+              const SizedBox(height: 8),
+              _FeedbackRow(
+                label: 'Overall',
+                value: _feedbackLabel(log.overallFeedback),
+                color: _feedbackColor(log.overallFeedback),
+              ),
+            ],
+
+            // trainer notes
+            if (log.trainerNotes != null) ...[
+              const SizedBox(height: 14),
+              const Divider(color: kDivider, height: 1),
+              const SizedBox(height: 12),
               const SectionLabel('Trainer Notes'),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 log.trainerNotes!,
                 style: const TextStyle(
@@ -312,6 +376,47 @@ class _ReviewStatusWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────
+// FEEDBACK ROW
+// ─────────────────────────────────────────
+
+class _FeedbackRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _FeedbackRow({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 13, color: kTextGrey)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

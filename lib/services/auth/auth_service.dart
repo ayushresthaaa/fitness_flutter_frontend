@@ -41,24 +41,19 @@ class AuthService {
     }
   }
 
-  //register new user
-  Future<User> register(String email, String password, String? name) async {
+  Future<String> register(String email, String password, String? name) async {
     final url = Uri.parse('$baseUrl/auth/register');
 
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'name': name,
-      }), //currently didnt use tojson method
+      body: jsonEncode({'email': email, 'password': password, 'name': name}),
     );
 
     final body = jsonDecode(response.body);
 
     if (response.statusCode == 201 && body['success'] == true) {
-      return User.fromJson(body['data']);
+      return body['data']['email'] as String;
     } else {
       throw Exception(body['message'] ?? 'Registration failed');
     }
@@ -146,6 +141,43 @@ class AuthService {
       return User.fromJson(body['data']);
     } else {
       throw Exception(body['message'] ?? 'Failed to fetch user info');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyEmail(String email, String otp) async {
+    final url = Uri.parse('$baseUrl/auth/verify-email');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'otp': otp}),
+    );
+
+    final body = jsonDecode(response.body);
+
+    if (response.statusCode == 200 && body['success'] == true) {
+      final user = User.fromJson(body['data']['user']);
+      final token = body['data']['token'] as String;
+      await _secureStorage.write(key: 'jwt_token', value: token);
+      return {'user': user, 'token': token};
+    } else {
+      throw Exception(body['message'] ?? 'Verification failed');
+    }
+  }
+
+  Future<void> resendOtp(String email) async {
+    final url = Uri.parse('$baseUrl/auth/resend-otp');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    final body = jsonDecode(response.body);
+
+    if (response.statusCode != 200 || body['success'] != true) {
+      throw Exception(body['message'] ?? 'Failed to resend OTP');
     }
   }
 }
