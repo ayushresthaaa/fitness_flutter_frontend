@@ -156,9 +156,11 @@ class FilteredRoutineScreen extends StatelessWidget {
             provider.routines,
           );
 
-          // Show AI empty state with generate button
           if (filteredRoutines.isEmpty) {
             if (filter == 'ai') {
+              if (provider.hasPendingAIRoutine) {
+                return const _AIPendingState();
+              }
               return const _AIEmptyState();
             }
             return EmptyState(
@@ -232,7 +234,23 @@ class _GenerateButtonState extends State<_GenerateButton> {
         _isGenerating = false;
       });
 
-      if (!success) {
+      if (success) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Routine Generated'),
+            content: const Text(
+              'Your AI routine has been sent to your trainer for review. You will be notified once it is approved.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -246,6 +264,9 @@ class _GenerateButtonState extends State<_GenerateButton> {
 
   @override
   Widget build(BuildContext context) {
+    final hasPending = context.watch<RoutineProvider>().hasPendingAIRoutine;
+
+    if (hasPending) return const SizedBox.shrink();
     return GestureDetector(
       onTap: _isGenerating ? null : _generate,
       child: Container(
@@ -312,7 +333,23 @@ class _AIEmptyStateState extends State<_AIEmptyState> {
         _isGenerating = false;
       });
 
-      if (!success) {
+      if (success) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Routine Generated'),
+            content: const Text(
+              'Your AI routine has been sent to your trainer for review. You will be notified once it is approved.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -353,6 +390,40 @@ class _AIEmptyStateState extends State<_AIEmptyState> {
               text: 'Generate Routine',
               isLoading: _isGenerating,
               onTap: _isGenerating ? null : _generate,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AIPendingState extends StatelessWidget {
+  const _AIPendingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.schedule_outlined, size: 48, color: kTextHint),
+            SizedBox(height: 12),
+            Text(
+              'Routine under review',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: kTextGrey,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Your AI routine has been sent to your trainer. You will be notified once it is approved.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: kTextHint),
             ),
           ],
         ),

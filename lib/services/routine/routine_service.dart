@@ -40,6 +40,7 @@ class RoutineService {
           .map((r) => Routine.fromJson(r))
           .toList(),
       'pagination': data['pagination'],
+      'hasPendingAIRoutine': data['hasPendingAIRoutine'] ?? false,
     };
   }
 

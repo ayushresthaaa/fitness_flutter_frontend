@@ -14,7 +14,7 @@ class RoutineProvider extends BaseProvider {
   int _totalPages = 1;
   int _total = 0;
   bool _hasMore = true;
-
+  bool _hasPendingAIRoutine = false;
   // Getters
   List<Routine> get routines => _routines;
   Routine? get selectedRoutine => _selectedRoutine;
@@ -22,7 +22,7 @@ class RoutineProvider extends BaseProvider {
   int get totalPages => _totalPages;
   int get total => _total;
   bool get hasMore => _hasMore;
-
+  bool get hasPendingAIRoutine => _hasPendingAIRoutine;
   // Create new routine
   Future<void> createRoutine({
     required String name,
@@ -55,6 +55,8 @@ class RoutineProvider extends BaseProvider {
     );
 
     if (result != null) {
+      print('Full result keys: ${result.keys.toList()}');
+      print('hasPendingAIRoutine from API: ${result['hasPendingAIRoutine']}');
       final List<Routine> newRoutines = result['routines'];
 
       if (loadMore) {
@@ -68,7 +70,7 @@ class RoutineProvider extends BaseProvider {
       _totalPages = pagination['totalPages'];
       _total = pagination['total'];
       _hasMore = _currentPage < _totalPages;
-
+      _hasPendingAIRoutine = result['hasPendingAIRoutine'] ?? false;
       notifyListeners();
     }
   }
@@ -247,6 +249,7 @@ class RoutineProvider extends BaseProvider {
     _totalPages = 1;
     _total = 0;
     _hasMore = true;
+    _hasPendingAIRoutine = false;
     clearError();
     notifyListeners();
   }
