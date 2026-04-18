@@ -120,6 +120,12 @@ class ApiEndpoints {
   static const String checkoutInitiate = '/payments/checkout';
   static const String checkoutVerify = '/payments/checkout/verify';
 
+  // Payment — subscription
+  static const String subscriptionInitiate = '/payments/subscription/initiate';
+  static const String subscriptionVerify = '/payments/subscription/verify';
+  static const String subscriptionStatus = '/payments/subscription/status';
+
+  //routine generation
   static const String generateRoutine = '/mlv3/generate';
 
   //meal endpoints

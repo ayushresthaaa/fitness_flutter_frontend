@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF1E88E5),
+                              color: const Color(0xFF1B3A6B),
                             ),
                           ),
                         ),
@@ -213,14 +213,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF1E88E5), Color(0xFF1565C0)],
+                          colors: [Color(0xFF1B3A6B), Color(0xFF1565C0)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFF1E88E5).withOpacity(0.3),
+                            color: const Color(0xFF1B3A6B).withOpacity(0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -272,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
-                                    foregroundColor: const Color(0xFF1E88E5),
+                                    foregroundColor: const Color(0xFF1B3A6B),
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
                                     ),
@@ -516,7 +516,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E88E5),
+                              color: const Color(0xFF1B3A6B),
                               letterSpacing: 1.2,
                             ),
                           ),
@@ -554,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               minHeight: 7,
                               backgroundColor: Colors.grey[200],
                               valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF1E88E5),
+                                Color(0xFF1B3A6B),
                               ),
                             ),
                           ),
@@ -593,7 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               minHeight: 7,
                               backgroundColor: Colors.grey[200],
                               valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF1E88E5),
+                                Color(0xFF1B3A6B),
                               ),
                             ),
                           ),
@@ -687,7 +687,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: _onBottomNavTap,
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
-          selectedItemColor: Color(0xFF1E88E5),
+          selectedItemColor: const Color(0xFF1B3A6B),
           unselectedItemColor: Colors.grey[500],
           showSelectedLabels: false,
           showUnselectedLabels: false,

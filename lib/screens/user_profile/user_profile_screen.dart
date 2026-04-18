@@ -11,6 +11,7 @@ import 'change_password_screen.dart';
 import '../../screens/user/trainer_change_request_screen.dart';
 import '../../screens/reminders/reminders_screen.dart';
 import '../../screens/meal/nutrition_goal_screen.dart';
+import '../../screens/subscription/subscription_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -118,11 +119,12 @@ class ProfileScreen extends StatelessWidget {
                   _ActionRow(
                     icon: Icons.payment_outlined,
                     label: 'View Your Plan',
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Plans coming soon')),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SubscriptionScreen(),
+                      ),
+                    ),
                   ),
                   _ActionRow(
                     icon: Icons.fitness_center_outlined,
@@ -214,9 +216,10 @@ class ProfileScreen extends StatelessWidget {
             // Pro upgrade banner — only for free users
             if (!isPro)
               GestureDetector(
-                onTap: () {
-                  // TODO: navigate to pro upgrade screen
-                },
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SubscriptionScreen()),
+                ),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   padding: const EdgeInsets.all(16),

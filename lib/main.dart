@@ -26,6 +26,7 @@ import './providers/trainer/trainer_request_provider.dart';
 import './providers/home/home_provider.dart';
 import './providers/reminders/reminders_provider.dart';
 import './services/notification/notification_schedular.dart';
+import './providers/payment/subscription_provider.dart';
 // Import your routes
 import 'routes/app_routes.dart';
 
@@ -102,6 +103,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
         ChangeNotifierProvider<ReminderProvider>(
           create: (_) => ReminderProvider(),
+        ),
+        ChangeNotifierProvider<SubscriptionProvider>(
+          create: (_) => SubscriptionProvider(),
         ),
       ],
       builder: (context, child) {
