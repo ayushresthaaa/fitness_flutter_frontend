@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // ── colors ──────────────────────────────────────────
-const kPrimary = Color(0xFF1E88E5);
+const kPrimary = Color(0xFF1B3A6B);
 const kBackground = Color(0xFFF5F5F5);
 const kWhite = Colors.white;
 const kTextDark = Color(0xFF212121);
@@ -11,7 +11,7 @@ const kRed = Color(0xFFF44336);
 const kRedLight = Color(0xFFFFCDD2);
 const kGreen = Color(0xFF388E3C);
 const kDivider = Color(0xFFF0F0F0);
-const kPrimaryLight = Color(0xFFE3F2FD);
+const kPrimaryLight = Color(0xFFE8EEF7); // light navy tint
 
 // big blue button with white text
 // use for main actions like Save, Finish Workout

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth/auth_provider.dart';
-import 'register_screen.dart';
-import '../home/home_screen.dart';
 import '../../providers/user/user.provider.dart';
+import '../../widgets/common.dart';
+import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -16,8 +17,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword =
-      true; //this is for the password field to show/hide password
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: kBackground,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -40,107 +40,139 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // App Logo/Title
-                Icon(Icons.fitness_center, size: 80, color: Colors.blue[700]),
                 const SizedBox(height: 16),
-                Text(
+
+                // Logo
+                Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 80,
+                    width: 80,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                const Text(
                   'Welcome Back',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: kTextDark,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 6),
+                const Text(
                   'Sign in to continue',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 14, color: kTextGrey),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 40),
 
                 // Email Field
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  onChanged: (_) => authProvider.clearError(),
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                Container(
+                  decoration: BoxDecoration(
+                    color: kWhite,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => authProvider.clearError(),
+                    style: const TextStyle(fontSize: 14, color: kTextDark),
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: const TextStyle(color: kTextGrey, fontSize: 14),
+                      prefixIcon: const Icon(Icons.email_outlined, color: kTextGrey, size: 20),
+                      filled: true,
+                      fillColor: kWhite,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: kDivider),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: kPrimary, width: 1.5),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 // Password Field
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  onChanged: (_) => authProvider.clearError(),
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
+                Container(
+                  decoration: BoxDecoration(
+                    color: kWhite,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    onChanged: (_) => authProvider.clearError(),
+                    style: const TextStyle(fontSize: 14, color: kTextDark),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: const TextStyle(color: kTextGrey, fontSize: 14),
+                      prefixIcon: const Icon(Icons.lock_outline, color: kTextGrey, size: 20),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: kTextGrey,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            setState(() => _obscurePassword = !_obscurePassword),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      filled: true,
+                      fillColor: kWhite,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: kDivider),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: kPrimary, width: 1.5),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                // Error Display
+                // Error
                 if (authProvider.error != null)
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: kRedLight,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red, size: 20),
-                        SizedBox(width: 8),
+                        const Icon(Icons.error_outline, color: kRed, size: 18),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             authProvider.error!,
-                            style: TextStyle(color: Colors.red.shade900),
+                            style: const TextStyle(color: kRed, fontSize: 13),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                const SizedBox(height: 24),
-                // Forgot password link
+                const SizedBox(height: 12),
+
+                // Forgot password
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
@@ -150,67 +182,39 @@ class _LoginScreenState extends State<LoginScreen> {
                         builder: (_) => const ForgotPasswordScreen(),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Forgot password?',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue[700],
+                        color: kPrimary,
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 8),
-                // Login Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    // Login Button
-                    onPressed: authProvider.isLoading
-                        ? null
-                        : () async {
-                            await authProvider.login(
-                              _emailController.text.trim(),
-                              _passwordController.text,
-                            );
-                            if (authProvider.isAuthenticated && mounted) {
-                              //fetch user profile after login, so we can set it in the user provider and check onboarding status
-                              final userProvider = context.read<UserProvider>();
-                              userProvider.setUser(authProvider.user!);
+                const SizedBox(height: 20),
 
-                              Navigator.pushReplacementNamed(
-                                context,
-                                HomeScreen.routeName,
-                              );
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: authProvider.isLoading
-                        ? SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : Text(
-                            'Sign In',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
+                // Login Button
+                PrimaryButton(
+                  text: 'Sign In',
+                  isLoading: authProvider.isLoading,
+                  onTap: authProvider.isLoading
+                      ? null
+                      : () async {
+                          await authProvider.login(
+                            _emailController.text.trim(),
+                            _passwordController.text,
+                          );
+                          if (authProvider.isAuthenticated && mounted) {
+                            final userProvider = context.read<UserProvider>();
+                            userProvider.setUser(authProvider.user!);
+                            Navigator.pushReplacementNamed(
+                              context,
+                              HomeScreen.routeName,
+                            );
+                          }
+                        },
                 ),
 
                 const SizedBox(height: 24),
@@ -218,24 +222,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey[300])),
+                    const Expanded(child: Divider(color: kDivider)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'OR',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: kTextGrey, fontSize: 13),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey[300])),
+                    const Expanded(child: Divider(color: kDivider)),
                   ],
                 ),
 
                 const SizedBox(height: 24),
 
-                // Google Sign In Button
+                // Google Sign In
                 SizedBox(
-                  width: double.infinity,
-                  height: 56,
+                  height: 50,
                   child: OutlinedButton.icon(
                     onPressed: authProvider.isLoading
                         ? null
@@ -252,20 +255,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                     icon: Image.network(
                       'https://www.google.com/favicon.ico',
-                      height: 24,
-                      width: 24,
+                      height: 20,
+                      width: 20,
                     ),
-                    label: Text(
+                    label: const Text(
                       'Continue with Google',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
+                        color: kTextDark,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      side: BorderSide(color: Colors.grey[300]!),
+                      backgroundColor: kWhite,
+                      side: const BorderSide(color: kDivider),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -275,24 +278,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // Don't have an account link
+                // Register link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "Don't have an account? ",
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: kTextGrey, fontSize: 13),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        RegisterScreen.routeName,
-                      ),
-                      child: Text(
+                      onTap: () =>
+                          Navigator.pushNamed(context, RegisterScreen.routeName),
+                      child: const Text(
                         'Register',
                         style: TextStyle(
-                          color: Colors.blue[700],
+                          color: kPrimary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
                       ),
                     ),

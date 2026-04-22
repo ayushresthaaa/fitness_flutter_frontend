@@ -37,35 +37,49 @@ class RoutineCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: kWhite,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.05), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Name + exercise count
+            /// HEADER
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
                     routine.name,
                     style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
                       color: kTextDark,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '$count ${count == 1 ? 'exercise' : 'exercises'}',
-                  style: const TextStyle(fontSize: 12, color: kTextGrey),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: kTextGrey.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
 
-            // Badges - From Trainer and Pending Review only
+            /// BADGES
             if (routine.createdByTrainer == true ||
                 routine.reviewStatus == 'pending')
               Padding(
@@ -74,114 +88,101 @@ class RoutineCard extends StatelessWidget {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    // From Trainer badge - blue
                     if (routine.createdByTrainer == true)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: kPrimaryLight,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'From Trainer',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: kPrimary,
-                          ),
-                        ),
-                      ),
+                      _badge('From Trainer', kPrimary),
 
-                    // Pending Review badge - orange
                     if (routine.reviewStatus == 'pending')
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF3E0),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          'Pending Review',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFFF57C00),
-                          ),
-                        ),
-                      ),
+                      _badge('Pending Review', const Color(0xFFF57C00)),
                   ],
                 ),
               ),
 
-            // Description
+            /// DESCRIPTION
             if (routine.description != null && routine.description!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   routine.description!,
-                  style: const TextStyle(fontSize: 12, color: kTextGrey),
-                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: kTextGrey.withOpacity(0.85),
+                  ),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
 
-            // Trainer notes - only shown if trainer left a note
+            /// 🔥 TRAINER NOTES (NEW STYLE)
             if (routine.trainerNotes != null &&
                 routine.trainerNotes!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  'Trainer: ${routine.trainerNotes!}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: kPrimary,
-                    fontStyle: FontStyle.italic,
+                padding: const EdgeInsets.only(top: 10),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: kPrimary.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: kPrimary.withOpacity(0.15)),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.sticky_note_2_rounded,
+                        size: 16,
+                        color: kPrimary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          routine.trainerNotes!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: kPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
-            // Muscle chips
+            /// MUSCLE CHIPS
             if (muscles.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: 12),
                 child: Wrap(
                   spacing: 6,
-                  children: muscles
-                      .map(
-                        (m) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: kPrimaryLight,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            m,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: kPrimary,
-                            ),
-                          ),
+                  runSpacing: 6,
+                  children: muscles.map((m) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: kPrimaryLight,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        m,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: kPrimary,
                         ),
-                      )
-                      .toList(),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
-            // Start workout button
+            /// ACTION
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -189,19 +190,25 @@ class RoutineCard extends StatelessWidget {
                   onTap: onStart,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
+                      horizontal: 16,
+                      vertical: 10,
                     ),
                     decoration: BoxDecoration(
                       color: kPrimary,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: kPrimary, width: 1.5),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: kPrimary.withOpacity(0.25),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.play_arrow_rounded, size: 14, color: kWhite),
-                        SizedBox(width: 4),
+                        Icon(Icons.play_arrow_rounded, size: 16, color: kWhite),
+                        SizedBox(width: 6),
                         Text(
                           'Start',
                           style: TextStyle(
@@ -217,6 +224,25 @@ class RoutineCard extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Reusable badge
+  Widget _badge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: color,
         ),
       ),
     );

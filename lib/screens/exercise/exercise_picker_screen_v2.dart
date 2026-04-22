@@ -10,6 +10,7 @@ import 'widgets/exercise_tray_v2.dart';
 import 'widgets/custom_exercise_list.dart';
 import '../../providers/exercise/custom_exercise_provider.dart';
 import 'custom_exercise/create_custom_exercise_screen.dart';
+import 'package:body_part_selector/body_part_selector.dart';
 
 class ExercisePickerScreenV2 extends StatefulWidget {
   final Function(List<Exercise>) onExercisesSelected;
@@ -62,6 +63,16 @@ class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2>
     }
   }
 
+  String? _getMuscleFromBodyParts(BodyParts parts) {
+    final map = parts.toMap();
+    for (final entry in _bodyPartToMuscle.entries) {
+      if (map[entry.key] == true) {
+        return entry.value;
+      }
+    }
+    return null;
+  }
+
   // Re-fetch with current filters applied
   void _applyFilters() {
     context.read<ExerciseProvider>().fetchExercises(
@@ -110,7 +121,30 @@ class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2>
 
     return Scaffold(
       backgroundColor: kBackground,
-      appBar: AppTopBar(title: 'Add Exercises'),
+      appBar: AppTopBar(
+        title: 'Add Exercises',
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: _openBodySelector,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _selectedMuscle != null ? kPrimary : kBackground,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.accessibility_new_outlined,
+                  size: 18,
+                  color: _selectedMuscle != null ? kWhite : kTextGrey,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -202,4 +236,118 @@ class _ExercisePickerScreenV2State extends State<ExercisePickerScreenV2>
       ),
     );
   }
+
+  //part selector
+  void _openBodySelector() {
+    BodyParts _bodyParts = const BodyParts();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: kWhite,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: Column(
+              children: [
+                // Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: kDivider,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Select Muscle Group',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: kTextDark,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: BodyPartSelectorTurnable(
+                    bodyParts: _bodyParts,
+                    onSelectionUpdated: (p) {
+                      setModalState(() => _bodyParts = p);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            _onMuscleChanged(null);
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: kBackground,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Clear',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: kTextDark,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: PrimaryButton(
+                          text: 'Apply',
+                          onTap: () {
+                            final muscle = _getMuscleFromBodyParts(_bodyParts);
+                            _onMuscleChanged(muscle);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // BodyParts field → exercise primaryMuscles string
+  static const Map<String, String> _bodyPartToMuscle = {
+    'leftUpperArm': 'biceps',
+    'rightUpperArm': 'biceps',
+    'leftLowerArm': 'forearms',
+    'rightLowerArm': 'forearms',
+    'leftShoulder': 'shoulders',
+    'rightShoulder': 'shoulders',
+    'upperBody': 'chest',
+    'lowerBody': 'glutes',
+    'abdomen': 'abdominals',
+    'leftUpperLeg': 'quadriceps',
+    'rightUpperLeg': 'quadriceps',
+    'leftLowerLeg': 'calves',
+    'rightLowerLeg': 'calves',
+  };
 }

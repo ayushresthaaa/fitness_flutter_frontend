@@ -27,6 +27,7 @@ dependencies:
   khalti_checkout_flutter: ^1.0.0-dev.9
   flutter_local_notifications: ^18.0.0
   timezone: ^0.9.4
+  body_part_selector: ^0.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -37,3 +38,4 @@ flutter:
 
   assets:
     - .env
+    - assets/images/

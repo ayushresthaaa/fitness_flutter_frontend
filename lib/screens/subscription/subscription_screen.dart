@@ -136,7 +136,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     if (!status.isPro) {
       return BottomBar(
         child: PrimaryButton(
-          text: 'Upgrade to Pro  —  Rs. 500 / month',
+          text: 'Upgrade to Pro',
           isLoading: provider.isPaymentLoading,
           onTap: provider.isPaymentLoading ? null : _startPayment,
         ),
@@ -347,7 +347,7 @@ class _FreeView extends StatelessWidget {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Billed monthly. Cancel anytime.',
+                  'Cancels after 1 month automatically.',
                   style: TextStyle(fontSize: 12, color: kTextGrey),
                   textAlign: TextAlign.center,
                 ),
